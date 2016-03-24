@@ -23,7 +23,7 @@ Abstract:
 #pragma once
 #endif // defined(_MSC_VER) && !defined(MOFCOMP_PASS)
 
-#include <winpackagefamily.h>
+#include "winpackagefamily.h"
 
 /*
  * When compiling C and C++ code using SDK header files, the development

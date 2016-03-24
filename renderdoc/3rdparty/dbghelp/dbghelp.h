@@ -24,7 +24,7 @@ Revision History:
 #pragma once
 #endif
 
-#include <winapifamily.h>
+#include "winapifamily.h"
 
 #define NONGAMESPARTITIONS WINAPI_PARTITION_DESKTOP | WINAPI_PARTITION_PKG_WER
 
@@ -4305,7 +4305,7 @@ RangeMapWrite(
 #include <poppack.h>
 
 
-#include <minidumpapiset.h>
+#include "minidumpapiset.h"
 
 
 #endif /* WINAPI_FAMILY_PARTITION(NONGAMESPARTITIONS) */
