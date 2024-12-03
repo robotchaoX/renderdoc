@@ -100,6 +100,8 @@
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Development'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|ARM64'">MinSpace</Optimization>
+      <FunctionLevelLinking Condition="'$(Configuration)|$(Platform)'=='Development|ARM64'">true</FunctionLevelLinking>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
