@@ -1,0 +1,34 @@
+EXTRA_INCLUDEPATH += $$[QT_INSTALL_HEADERS]/../ $$[QT_INSTALL_HEADERS]
+EXTRA_LIBDIR += $$[QT_INSTALL_LIBS] $$[QT_INSTALL_LIBS]/manual-link
+!host_build|!cross_compile {
+    QMAKE_LIBS_PRIVATE+=$$[QT_INSTALL_LIBS]/bz2.lib
+    QMAKE_LIBS_PRIVATE+=$$[QT_INSTALL_LIBS]/libpng16.lib $$[QT_INSTALL_LIBS]/zlib.lib
+    QMAKE_LIBS_PRIVATE+=$$[QT_INSTALL_LIBS]/zstd.lib
+    QMAKE_CC=cl.exe
+    QMAKE_CXX=cl.exe
+    QMAKE_AR=lib.exe
+    QMAKE_RANLIB=:
+    QMAKE_STRIP=
+    QMAKE_NM=
+    QMAKE_RC=rc.exe
+    QMAKE_MT=mt.exe
+    QMAKE_LIB=lib.exe
+    QMAKE_LINK=link.exe
+    QMAKE_LIBS+=kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
+    QMAKE_RC+=-c65001 -DWIN32
+    QMAKE_CFLAGS_RELEASE+=-nologo -DWIN32 -D_WINDOWS -utf-8 -MP  -MD -O2 -Oi -Gy -DNDEBUG -Z7
+    QMAKE_CXXFLAGS_RELEASE=
+    QMAKE_LFLAGS+=-machine:ARM64 -nologo -DEBUG -INCREMENTAL:NO -OPT:REF -OPT:ICF
+    QMAKE_LFLAGS_SHLIB+=-machine:ARM64 -nologo -DEBUG -INCREMENTAL:NO -OPT:REF -OPT:ICF
+    QMAKE_LFLAGS_PLUGIN+=-machine:ARM64 -nologo -DEBUG -INCREMENTAL:NO -OPT:REF -OPT:ICF
+    QMAKE_LIBFLAGS_RELEASE+=-machine:ARM64 -nologo
+}
+QT_CPU_FEATURES.arm64 = 
+QT.global_private.enabled_features = alloca_malloc_h alloca dbus gui network relocatable sql system-zlib testlib widgets xml zstd
+QT.global_private.disabled_features = sse2 alloca_h android-style-assets avx2 private_tests dbus-linked dlopen gc_binaries intelcet libudev posix_fallocate reduce_exports reduce_relocations release_tools stack-protector-strong
+QT_COORD_TYPE = double
+QMAKE_LIBS_ZLIB = $$[QT_INSTALL_LIBS]/zlib.lib
+QMAKE_LIBS_ZSTD = -lzstd
+QT_BUILD_PARTS += libs tools
+CONFIG += compile_examples force_debug_info largefile precompile_header
+QT_HOST_CFLAGS_DBUS += 
