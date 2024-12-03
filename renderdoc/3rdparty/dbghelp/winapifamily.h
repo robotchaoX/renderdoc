@@ -23,38 +23,7 @@ Abstract:
 #pragma once
 #endif // defined(_MSC_VER) && !defined(MOFCOMP_PASS)
 
-
-#undef _Out_
-#define _Out_
-#undef _In_
-#define _In_
-#undef _Always_
-#define _Always_(annos)
-#define _In_reads_(size)
-#define _In_reads_opt_(size)
-#define _In_reads_bytes_(size)
-#define _In_reads_bytes_opt_(size)
-#define _Inout_updates_bytes_(size)
-#define _Out_writes_(size)
-#define _Out_writes_opt_(size)
-#define _Out_writes_to_opt_(size,count)
-#define _Out_writes_bytes_(size)
-#define _Out_writes_bytes_opt_(size)
-#define _Out_writes_bytes_to_(size,count)
-#define _Outptr_
-#define _Outptr_opt_
-#define _Outptr_opt_result_maybenull_
-#define _Outptr_opt_result_bytebuffer_(size)
-#define _Outptr_result_maybenull_
-#define _Outptr_result_bytebuffer_(size)
-#define _Out_writes_all_opt_(size)
-#define _COM_Outptr_
-#define _COM_Outptr_opt_
-#define _COM_Outptr_opt_result_maybenull_
-#define _Field_size_(size)
-#define _Field_size_full_(size)
-#define _Field_size_opt_(size)
-#define _Field_size_bytes_full_(size)
+#include <winpackagefamily.h>
 
 /*
  * When compiling C and C++ code using SDK header files, the development
@@ -81,6 +50,7 @@ Abstract:
  * WINAPI_PARTITION_PC_APP             // specific to Desktop-only store apps
  * WINAPI_PARTITION_PHONE_APP          // specific to Phone-only store apps
  * WINAPI_PARTITION_SYSTEM             // specific to System applications
+ * WINAPI_PARTITION_GAMES              // specific to games and apps
 
  * The following partitions are indirect partitions and defined in 
  * winpackagefamily.h. These partitions are related to package based 
@@ -99,6 +69,7 @@ Abstract:
 #define WINAPI_FAMILY_PHONE_APP            3   /* Windows Phone Applications */
 #define WINAPI_FAMILY_SYSTEM               4   /* Windows Drivers and Tools */
 #define WINAPI_FAMILY_SERVER               5   /* Windows Server Applications */
+#define WINAPI_FAMILY_GAMES                6   /* Windows Games and Applications */
 #define WINAPI_FAMILY_DESKTOP_APP          100   /* Windows Desktop Applications */
 /* The value of WINAPI_FAMILY_DESKTOP_APP may change in future SDKs. */
 /* Additional WINAPI_FAMILY values may be defined in future SDKs. */
@@ -132,31 +103,33 @@ Abstract:
  * An X indicates that the given partition is active for the given
  * platform/family.
  *
- *                                +-------------------+---+
- *                                |      *Partition*  |   |
- *                                +---+---+---+---+---+---+
- *                                |   |   |   |   |   |   |
- *                                |   |   |   |   |   |   |
- *                                |   |   |   | P |   |   |
- *                                |   |   |   | H |   |   |
- *                                | D |   |   | O |   |   |
- *                                | E |   | P | N | S | S |
- *                                | S |   | C | E | Y | E |
- *                                | K |   | _ | _ | S | R |
- *                                | T | A | A | A | T | V |
- * +-------------------------+----+ O | P | P | P | E | E |
- * |     *Platform/Family*       \| P | P | P | P | M | R |
- * +------------------------------+---+---+---+---+---+---+
- * | WINAPI_FAMILY_DESKTOP_APP    | X | X | X |   |   |   |
- * +------------------------------+---+---+---+---+---+---+
- * |      WINAPI_FAMILY_PC_APP    |   | X | X |   |   |   |
- * +------------------------------+---+---+---+---+---+---+
- * |   WINAPI_FAMILY_PHONE_APP    |   | X |   | X |   |   |
- * +----------------------------- +---+---+---+---+---+---+
- * |      WINAPI_FAMILY_SYSTEM    |   |   |   |   | X |   |
- * +----------------------------- +---+---+---+---+---+---+
- * |      WINAPI_FAMILY_SERVER    |   |   |   |   | X | X |
- * +------------------------------+---+---+---+---+---+---+
+ *                                +---------------------------+
+ *                                |      *Partition*          |
+ *                                +---+---+---+---+---+---+---+
+ *                                |   |   |   |   |   |   |   |
+ *                                |   |   |   |   |   |   |   |
+ *                                |   |   |   | P |   |   |   |
+ *                                |   |   |   | H |   |   |   |
+ *                                | D |   |   | O |   |   |   |
+ *                                | E |   | P | N | S | S |   |
+ *                                | S |   | C | E | Y | E | G |
+ *                                | K |   | _ | _ | S | R | A |
+ *                                | T | A | A | A | T | V | M |
+ * +-------------------------+----+ O | P | P | P | E | E | E |
+ * |     *Platform/Family*       \| P | P | P | P | M | R | S |
+ * +------------------------------+---+---+---+---+---+---+---+
+ * | WINAPI_FAMILY_DESKTOP_APP    | X | X | X |   |   |   |   |
+ * +------------------------------+---+---+---+---+---+---+---+
+ * |      WINAPI_FAMILY_PC_APP    |   | X | X |   |   |   |   |
+ * +------------------------------+---+---+---+---+---+---+---+
+ * |   WINAPI_FAMILY_PHONE_APP    |   | X |   | X |   |   |   |
+ * +----------------------------- +---+---+---+---+---+---+---+
+ * |      WINAPI_FAMILY_SYSTEM    |   |   |   |   | X |   |   |
+ * +----------------------------- +---+---+---+---+---+---+---+
+ * |      WINAPI_FAMILY_SERVER    |   |   |   |   | X | X |   |
+ * +------------------------------+---+---+---+---+---+---+---+
+ * |       WINAPI_FAMILY_GAMES    |   |   |   |   |   |   | X |
+ * +------------------------------+---+---+---+---+---+---+---+
  *
  * The table above is encoded in the following expressions,
  * each of which evaluates to 1 or 0.
@@ -168,6 +141,7 @@ Abstract:
     WINAPI_FAMILY != WINAPI_FAMILY_PC_APP &&                                   \
     WINAPI_FAMILY != WINAPI_FAMILY_PHONE_APP &&                                \
     WINAPI_FAMILY != WINAPI_FAMILY_SYSTEM &&                                   \
+    WINAPI_FAMILY != WINAPI_FAMILY_GAMES &&                                    \
     WINAPI_FAMILY != WINAPI_FAMILY_SERVER
 #error Unknown WINAPI_FAMILY value. Was it defined in terms of a WINAPI_PARTITION_* value?
 #endif
@@ -192,6 +166,12 @@ Abstract:
 #ifndef WINAPI_PARTITION_PHONE_APP
 #define WINAPI_PARTITION_PHONE_APP (WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP)
 #endif 
+
+#ifndef WINAPI_PARTITION_GAMES
+#define WINAPI_PARTITION_GAMES                                                 \
+  (WINAPI_FAMILY == WINAPI_FAMILY_GAMES ||                                     \
+   WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP)
+#endif
 
 /*
  * SYSTEM is the only partition defined here.
