@@ -233,7 +233,7 @@ private slots:
   void channelsWidget_toggled(bool checked) { UI_UpdateChannels(); }
   void channelsWidget_selected(int index) { UI_UpdateChannels(); }
 protected:
-  void enterEvent(QEvent *event) override;
+  void enterEvent(QEnterEvent *event) override;
   void showEvent(QShowEvent *event) override;
 
 private:
@@ -369,7 +369,7 @@ private:
 
   rdcarray<DescriptorThumbUpdate> m_DescriptorThumbUpdates;
 
-  QTime m_CustomShaderTimer;
+  QElapsedTimer m_CustomShaderTimer;
   int m_CustomShaderWriteTime = 0;
 
   QFileSystemWatcher *m_Watcher = NULL;

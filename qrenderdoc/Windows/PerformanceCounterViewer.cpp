@@ -122,7 +122,7 @@ public:
   Qt::ItemFlags flags(const QModelIndex &index) const override
   {
     if(!index.isValid())
-      return 0;
+      return Qt::NoItemFlags;
 
     return QAbstractItemModel::flags(index);
   }
@@ -136,7 +136,7 @@ public:
 
       const CounterDescription &cd = m_Descriptions[section - 1];
 
-      QString unit = QString::null;
+      QString unit = QString();
       switch(cd.unit)
       {
         case CounterUnit::Bytes: unit = lit("bytes"); break;

@@ -73,7 +73,7 @@ public:
   Qt::ItemFlags flags(const QModelIndex &index) const override
   {
     if(!index.isValid())
-      return 0;
+      return Qt::NoItemFlags;
 
     return QAbstractItemModel::flags(index);
   }
@@ -419,7 +419,7 @@ void ResourceInspector::RevealParameter(SDObject *param)
         if(current->GetChild(i) == next)
         {
           current = next;
-          item = parent.child((int)i, 0);
+          item = m_ChunksModel->index((int)i, 0, parent);
           break;
         }
       }
@@ -634,7 +634,7 @@ void ResourceInspector::on_resourceUsage_doubleClicked(const QModelIndex &index)
   m_Ctx.SetEventID({}, eid, eid);
 }
 
-void ResourceInspector::enterEvent(QEvent *event)
+void ResourceInspector::enterEvent(QEnterEvent  *event)
 {
   HighlightUsage();
 }

@@ -1593,7 +1593,7 @@ protected:
     int off = name.indexOf(QLatin1Char('<'));
     while(off >= 0 && off + 4 < name.size())
     {
-      if(name[off + 1] == QLatin1Char('/') || name.midRef(off, 5) == lit("<span"))
+      if(name[off + 1] == QLatin1Char('/') || name.mid(off, 5) == lit("<span"))
       {
         int end = name.indexOf(QLatin1Char('>'), off);
         name.remove(off, end - off + 1);
@@ -2326,7 +2326,7 @@ and these can be queried with a filter such as <code>$action(flags & Clear|Clear
       // split by whitespace)
       QStringList flagStrings;
       for(int i = 2; i < tokens.count(); i++)
-        flagStrings.append(tokens[i].text.split(QLatin1Char('|'), QString::KeepEmptyParts));
+        flagStrings.append(tokens[i].text.split(QLatin1Char('|'), Qt::KeepEmptyParts));
 
       // if we have an empty string in the list somewhere that means the | list was broken
       if(flagStrings.contains(QString()))
@@ -3398,7 +3398,7 @@ void ParseErrorTipLabel::paintEvent(QPaintEvent *ev)
 {
   QStylePainter p(this);
   QStyleOptionFrame opt;
-  opt.init(this);
+  opt.initFrom(this);
   p.drawPrimitive(QStyle::PE_PanelTipLabel, opt);
   p.end();
 
@@ -3412,7 +3412,7 @@ void ParseErrorTipLabel::resizeEvent(QResizeEvent *e)
 {
   QStyleHintReturnMask frameMask;
   QStyleOption option;
-  option.init(this);
+  option.initFrom(this);
   if(style()->styleHint(QStyle::SH_ToolTip_Mask, &option, this, &frameMask))
     setMask(frameMask.region);
 
@@ -3500,7 +3500,6 @@ EventBrowser::EventBrowser(ICaptureContext &ctx, QWidget *parent)
   {
     QHBoxLayout *box = new QHBoxLayout(ui->breadcrumbStrip);
     box->setContentsMargins(QMargins(0, 0, 0, 0));
-    box->setMargin(0);
     box->setSpacing(0);
     m_Breadcrumbs = new MarkerBreadcrumbs(m_Ctx, this, this);
     box->addWidget(m_Breadcrumbs);
@@ -5111,7 +5110,8 @@ void EventBrowser::GetMaxNameLength(int &maxNameLength, int indent, bool firstch
 
   for(int i = 0, rowCount = idx.model()->rowCount(idx); i < rowCount; i++)
   {
-    GetMaxNameLength(maxNameLength, indent + 1, firstchild, idx.child(i, COL_NAME));
+    QModelIndex childIdx = idx.model()->index(i, COL_NAME, idx);
+    GetMaxNameLength(maxNameLength, indent + 1, firstchild, childIdx);
     firstchild = false;
   }
 }
@@ -5149,7 +5149,8 @@ void EventBrowser::ExportAction(QTextStream &writer, int maxNameLength, int inde
 
   for(int i = 0, rowCount = idx.model()->rowCount(idx); i < rowCount; i++)
   {
-    ExportAction(writer, maxNameLength, indent + 1, firstchild, idx.child(i, COL_NAME));
+    QModelIndex childIdx = idx.model()->index(i, COL_NAME, idx);
+    ExportAction(writer, maxNameLength, indent + 1, firstchild, childIdx);
     firstchild = false;
   }
 }

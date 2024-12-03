@@ -199,7 +199,7 @@ ShaderViewer::ShaderViewer(ICaptureContext &ctx, QWidget *parent)
 
     QVBoxLayout *framelayout = new QVBoxLayout(m_DisassemblyFrame);
     framelayout->setSpacing(0);
-    framelayout->setMargin(0);
+    framelayout->setContentsMargins(0, 0, 0, 0);
     framelayout->addWidget(m_DisassemblyToolbar);
     framelayout->addWidget(m_DisassemblyView);
 
@@ -4609,7 +4609,7 @@ bool ShaderViewer::updateWatchVariable(RDTreeWidgetItem *watchItem, const RDTree
     {
       QPainter painter(&pm);
 
-      QPen pen(ui->watch->palette().foreground(), 1.0);
+      QPen pen(ui->watch->palette().WindowText(), 1.0);
       painter.setPen(pen);
       painter.drawLine(QPoint(0, 0), QPoint(h - 1, 0));
       painter.drawLine(QPoint(h - 1, 0), QPoint(h - 1, h - 1));

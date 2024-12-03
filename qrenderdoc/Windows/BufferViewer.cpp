@@ -299,7 +299,7 @@ public:
 
   void MouseWheel(QWheelEvent *e) override
   {
-    float mod = (1.0f - e->delta() / 2500.0f);
+    float mod = (1.0f - e->angleDelta().y() / 2500.0f);
 
     SetDistance(qMax(1e-6f, m_Distance * mod));
   }
@@ -917,7 +917,7 @@ public:
   Qt::ItemFlags flags(const QModelIndex &index) const override
   {
     if(!index.isValid())
-      return 0;
+      return Qt::NoItemFlags;
 
     return QAbstractItemModel::flags(index);
   }

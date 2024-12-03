@@ -109,7 +109,7 @@ private slots:
   void on_resourceUsage_doubleClicked(const QModelIndex &index);
 
 protected:
-  void enterEvent(QEvent *event) override;
+  void enterEvent(QEnterEvent *event) override;
   void showEvent(QShowEvent *event) override;
 
 private:

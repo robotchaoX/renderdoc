@@ -5,6 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui widgets svg network
+greaterThan(QT_MAJOR_VERSION, 5): QT += core5compat
 
 CONFIG   += silent
 

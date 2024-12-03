@@ -25,6 +25,7 @@
 #include "FindReplace.h"
 #include <QKeyEvent>
 #include <QLineEdit>
+#include <QCompleter>
 #include "Widgets/Extended/RDLineEdit.h"
 #include "ui_FindReplace.h"
 
@@ -39,10 +40,25 @@ FindReplace::FindReplace(QWidget *parent) : QFrame(parent), ui(new Ui::FindRepla
   setDirection(FindReplace::Down);
 
   RDLineEdit *edit = new RDLineEdit(this);
-  ui->findText->setLineEdit(edit);
+  ui->findText->setLineEdit(edit);  
 
-  ui->findText->setAutoCompletion(false);
-  ui->replaceText->setAutoCompletion(false);
+  //ui->findText->setAutoCompletion(false);
+  //ui->replaceText->setAutoCompletion(false);
+
+  // Disable auto-completion
+  QCompleter *findCompleter = ui->findText->completer();
+  if(findCompleter)
+  {
+    findCompleter->setCompletionMode(QCompleter::InlineCompletion);
+    findCompleter->setFilterMode(Qt::MatchContains);
+  }
+
+  QCompleter *replaceCompleter = ui->replaceText->completer();
+  if(replaceCompleter)
+  {
+    replaceCompleter->setCompletionMode(QCompleter::InlineCompletion);
+    replaceCompleter->setFilterMode(Qt::MatchContains);
+  }
 
   QObject::connect(edit, &RDLineEdit::keyPress, [this](QKeyEvent *event) {
     if(event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter)

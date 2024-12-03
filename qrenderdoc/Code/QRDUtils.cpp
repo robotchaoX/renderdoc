@@ -2364,7 +2364,7 @@ QString RDDialog::getExistingDirectory(QWidget *parent, const QString &caption, 
 {
   QFileDialog fd(parent, caption, dir, QString());
   fd.setAcceptMode(QFileDialog::AcceptOpen);
-  fd.setFileMode(QFileDialog::DirectoryOnly);
+  fd.setFileMode(QFileDialog::Directory);
   fd.setOptions(options);
   show(&fd);
 
@@ -3777,7 +3777,7 @@ QVariant StructuredDataItemModel::headerData(int section, Qt::Orientation orient
 Qt::ItemFlags StructuredDataItemModel::flags(const QModelIndex &index) const
 {
   if(!index.isValid())
-    return 0;
+    return Qt::NoItemFlags;
 
   return QAbstractItemModel::flags(index);
 }
