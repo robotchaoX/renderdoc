@@ -40,16 +40,23 @@
 #ifndef QNETWORKCONFIGMANAGER_H
 #define QNETWORKCONFIGMANAGER_H
 
+#if 0
+#pragma qt_class(QNetworkConfigurationManager)
+#endif
+
 #include <QtNetwork/qtnetworkglobal.h>
 #include <QtCore/qobject.h>
 #include <QtNetwork/qnetworkconfiguration.h>
+
+QT_WARNING_PUSH
+QT_WARNING_DISABLE_DEPRECATED
 
 #ifndef QT_NO_BEARERMANAGEMENT
 
 QT_BEGIN_NAMESPACE
 
 class QNetworkConfigurationManagerPrivate;
-class Q_NETWORK_EXPORT QNetworkConfigurationManager : public QObject
+class QT_DEPRECATED_BEARER_MANAGEMENT Q_NETWORK_EXPORT QNetworkConfigurationManager : public QObject
 {
     Q_OBJECT
 
@@ -66,7 +73,7 @@ public:
 
     Q_DECLARE_FLAGS(Capabilities, Capability)
 
-    explicit QNetworkConfigurationManager(QObject *parent = Q_NULLPTR);
+    explicit QNetworkConfigurationManager(QObject *parent = nullptr);
     virtual ~QNetworkConfigurationManager();
 
     QNetworkConfigurationManager::Capabilities capabilities() const;
@@ -96,5 +103,7 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(QNetworkConfigurationManager::Capabilities)
 QT_END_NAMESPACE
 
 #endif // QT_NO_BEARERMANAGEMENT
+
+QT_WARNING_POP
 
 #endif // QNETWORKCONFIGMANAGER_H

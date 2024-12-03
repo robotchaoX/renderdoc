@@ -57,6 +57,7 @@
 #define QSSLCONFIGURATION_H
 
 #include <QtNetwork/qtnetworkglobal.h>
+#include <QtCore/qmap.h>
 #include <QtCore/qshareddata.h>
 #include <QtNetwork/qsslsocket.h>
 #include <QtNetwork/qssl.h>
@@ -72,6 +73,11 @@ class QSslKey;
 class QSslEllipticCurve;
 class QSslDiffieHellmanParameters;
 
+namespace dtlsopenssl
+{
+class DtlsState;
+}
+
 class QSslConfigurationPrivate;
 class Q_NETWORK_EXPORT QSslConfiguration
 {
@@ -79,12 +85,10 @@ public:
     QSslConfiguration();
     QSslConfiguration(const QSslConfiguration &other);
     ~QSslConfiguration();
-#ifdef Q_COMPILER_RVALUE_REFS
-    QSslConfiguration &operator=(QSslConfiguration &&other) Q_DECL_NOTHROW { swap(other); return *this; }
-#endif
+    QSslConfiguration &operator=(QSslConfiguration &&other) noexcept { swap(other); return *this; }
     QSslConfiguration &operator=(const QSslConfiguration &other);
 
-    void swap(QSslConfiguration &other) Q_DECL_NOTHROW
+    void swap(QSslConfiguration &other) noexcept
     { qSwap(d, other.d); }
 
     bool operator==(const QSslConfiguration &other) const;
@@ -127,6 +131,12 @@ public:
     // Certificate Authority (CA) settings
     QList<QSslCertificate> caCertificates() const;
     void setCaCertificates(const QList<QSslCertificate> &certificates);
+    bool addCaCertificates(
+            const QString &path, QSsl::EncodingFormat format = QSsl::Pem,
+            QSslCertificate::PatternSyntax syntax = QSslCertificate::PatternSyntax::FixedString);
+    void addCaCertificate(const QSslCertificate &certificate);
+    void addCaCertificates(const QList<QSslCertificate> &certificates);
+
     static QList<QSslCertificate> systemCaCertificates();
 
     void setSslOption(QSsl::SslOption option, bool on);
@@ -149,8 +159,23 @@ public:
     QSslDiffieHellmanParameters diffieHellmanParameters() const;
     void setDiffieHellmanParameters(const QSslDiffieHellmanParameters &dhparams);
 
+    QMap<QByteArray, QVariant> backendConfiguration() const;
+    void setBackendConfigurationOption(const QByteArray &name, const QVariant &value);
+    void setBackendConfiguration(const QMap<QByteArray, QVariant> &backendConfiguration = QMap<QByteArray, QVariant>());
+
     static QSslConfiguration defaultConfiguration();
     static void setDefaultConfiguration(const QSslConfiguration &configuration);
+
+#if QT_CONFIG(dtls) || defined(Q_CLANG_QDOC)
+    bool dtlsCookieVerificationEnabled() const;
+    void setDtlsCookieVerificationEnabled(bool enable);
+
+    static QSslConfiguration defaultDtlsConfiguration();
+    static void setDefaultDtlsConfiguration(const QSslConfiguration &configuration);
+#endif // dtls
+
+    void setOcspStaplingEnabled(bool enable);
+    bool ocspStaplingEnabled() const;
 
     enum NextProtocolNegotiationStatus {
         NextProtocolNegotiationNone,
@@ -177,6 +202,8 @@ private:
     friend class QSslConfigurationPrivate;
     friend class QSslSocketBackendPrivate;
     friend class QSslContext;
+    friend class QDtlsBasePrivate;
+    friend class dtlsopenssl::DtlsState;
     QSslConfiguration(QSslConfigurationPrivate *dd);
     QSharedDataPointer<QSslConfigurationPrivate> d;
 };

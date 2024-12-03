@@ -75,24 +75,28 @@ public:
                        QueryType queryType = TcpSocket);
     explicit QNetworkProxyQuery(quint16 bindPort, const QString &protocolTag = QString(),
                        QueryType queryType = TcpServer);
-#ifndef QT_NO_BEARERMANAGEMENT
+#if !defined(QT_NO_BEARERMANAGEMENT) && QT_DEPRECATED_SINCE(5, 10)
+QT_WARNING_PUSH
+QT_WARNING_DISABLE_DEPRECATED
+    Q_DECL_DEPRECATED_X("QNetworkConfiguration support in QNetworkProxy is deprecated")
     QNetworkProxyQuery(const QNetworkConfiguration &networkConfiguration,
                        const QUrl &requestUrl, QueryType queryType = UrlRequest);
+    Q_DECL_DEPRECATED_X("QNetworkConfiguration support in QNetworkProxy is deprecated")
     QNetworkProxyQuery(const QNetworkConfiguration &networkConfiguration,
                        const QString &hostname, int port, const QString &protocolTag = QString(),
                        QueryType queryType = TcpSocket);
+    Q_DECL_DEPRECATED_X("QNetworkConfiguration support in QNetworkProxy is deprecated")
     QNetworkProxyQuery(const QNetworkConfiguration &networkConfiguration,
                        quint16 bindPort, const QString &protocolTag = QString(),
                        QueryType queryType = TcpServer);
+QT_WARNING_POP
 #endif
     QNetworkProxyQuery(const QNetworkProxyQuery &other);
-#ifdef Q_COMPILER_RVALUE_REFS
-    QNetworkProxyQuery &operator=(QNetworkProxyQuery &&other) Q_DECL_NOTHROW { swap(other); return *this; }
-#endif
+    QNetworkProxyQuery &operator=(QNetworkProxyQuery &&other) noexcept { swap(other); return *this; }
     QNetworkProxyQuery &operator=(const QNetworkProxyQuery &other);
     ~QNetworkProxyQuery();
 
-    void swap(QNetworkProxyQuery &other) Q_DECL_NOTHROW { qSwap(d, other.d); }
+    void swap(QNetworkProxyQuery &other) noexcept { qSwap(d, other.d); }
 
     bool operator==(const QNetworkProxyQuery &other) const;
     inline bool operator!=(const QNetworkProxyQuery &other) const
@@ -116,9 +120,14 @@ public:
     QUrl url() const;
     void setUrl(const QUrl &url);
 
-#ifndef QT_NO_BEARERMANAGEMENT
+#if !defined(QT_NO_BEARERMANAGEMENT) && QT_DEPRECATED_SINCE(5, 10)
+QT_WARNING_PUSH
+QT_WARNING_DISABLE_DEPRECATED
+    Q_DECL_DEPRECATED_X("QNetworkConfiguration support in QNetworkProxy is deprecated")
     QNetworkConfiguration networkConfiguration() const;
+    Q_DECL_DEPRECATED_X("QNetworkConfiguration support in QNetworkProxy is deprecated")
     void setNetworkConfiguration(const QNetworkConfiguration &networkConfiguration);
+QT_WARNING_POP
 #endif
 
 private:
@@ -156,13 +165,11 @@ public:
     QNetworkProxy(ProxyType type, const QString &hostName = QString(), quint16 port = 0,
                   const QString &user = QString(), const QString &password = QString());
     QNetworkProxy(const QNetworkProxy &other);
-#ifdef Q_COMPILER_RVALUE_REFS
-    QNetworkProxy &operator=(QNetworkProxy &&other) Q_DECL_NOTHROW { swap(other); return *this; }
-#endif
+    QNetworkProxy &operator=(QNetworkProxy &&other) noexcept { swap(other); return *this; }
     QNetworkProxy &operator=(const QNetworkProxy &other);
     ~QNetworkProxy();
 
-    void swap(QNetworkProxy &other) Q_DECL_NOTHROW { qSwap(d, other.d); }
+    void swap(QNetworkProxy &other) noexcept { qSwap(d, other.d); }
 
     bool operator==(const QNetworkProxy &other) const;
     inline bool operator!=(const QNetworkProxy &other) const
