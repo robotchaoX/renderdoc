@@ -71,10 +71,13 @@ class Q_WIDGETS_EXPORT QComboBox : public QWidget
     Q_PROPERTY(SizeAdjustPolicy sizeAdjustPolicy READ sizeAdjustPolicy WRITE setSizeAdjustPolicy)
     Q_PROPERTY(int minimumContentsLength READ minimumContentsLength WRITE setMinimumContentsLength)
     Q_PROPERTY(QSize iconSize READ iconSize WRITE setIconSize)
+    Q_PROPERTY(QString placeholderText READ placeholderText WRITE setPlaceholderText)
 
 #if QT_CONFIG(completer)
+#if QT_DEPRECATED_SINCE(5, 13)
     Q_PROPERTY(bool autoCompletion READ autoCompletion WRITE setAutoCompletion DESIGNABLE false)
     Q_PROPERTY(Qt::CaseSensitivity autoCompletionCaseSensitivity READ autoCompletionCaseSensitivity WRITE setAutoCompletionCaseSensitivity DESIGNABLE false)
+#endif
 #endif // QT_CONFIG(completer)
 
     Q_PROPERTY(bool duplicatesEnabled READ duplicatesEnabled WRITE setDuplicatesEnabled)
@@ -82,7 +85,7 @@ class Q_WIDGETS_EXPORT QComboBox : public QWidget
     Q_PROPERTY(int modelColumn READ modelColumn WRITE setModelColumn)
 
 public:
-    explicit QComboBox(QWidget *parent = Q_NULLPTR);
+    explicit QComboBox(QWidget *parent = nullptr);
     ~QComboBox();
 
     int maxVisibleItems() const;
@@ -93,11 +96,16 @@ public:
     int maxCount() const;
 
 #if QT_CONFIG(completer)
+#if QT_DEPRECATED_SINCE(5, 13)
+    QT_DEPRECATED_X("Use completer() instead.")
     bool autoCompletion() const;
+    QT_DEPRECATED_X("Use setCompleter() instead.")
     void setAutoCompletion(bool enable);
-
+    QT_DEPRECATED_X("Use completer()->caseSensitivity() instead.")
     Qt::CaseSensitivity autoCompletionCaseSensitivity() const;
+    QT_DEPRECATED_X("Use completer()->setCaseSensitivity() instead.")
     void setAutoCompletionCaseSensitivity(Qt::CaseSensitivity sensitivity);
+#endif
 #endif
 
     bool duplicatesEnabled() const;
@@ -129,8 +137,11 @@ public:
     enum SizeAdjustPolicy {
         AdjustToContents,
         AdjustToContentsOnFirstShow,
-        AdjustToMinimumContentsLength, // ### Qt 6: remove
-        AdjustToMinimumContentsLengthWithIcon
+#if QT_DEPRECATED_SINCE(5, 15)
+        AdjustToMinimumContentsLength Q_DECL_ENUMERATOR_DEPRECATED_X(
+            "Use AdjustToContents or AdjustToContentsOnFirstShow"), // ### Qt 6: remove
+#endif
+        AdjustToMinimumContentsLengthWithIcon = AdjustToContentsOnFirstShow + 2
     };
     Q_ENUM(SizeAdjustPolicy)
 
@@ -140,6 +151,9 @@ public:
     void setMinimumContentsLength(int characters);
     QSize iconSize() const;
     void setIconSize(const QSize &size);
+
+    void setPlaceholderText(const QString &placeholderText);
+    QString placeholderText() const;
 
     bool isEditable() const;
     void setEditable(bool editable);
@@ -196,14 +210,14 @@ public:
     QAbstractItemView *view() const;
     void setView(QAbstractItemView *itemView);
 
-    QSize sizeHint() const Q_DECL_OVERRIDE;
-    QSize minimumSizeHint() const Q_DECL_OVERRIDE;
+    QSize sizeHint() const override;
+    QSize minimumSizeHint() const override;
 
     virtual void showPopup();
     virtual void hidePopup();
 
-    bool event(QEvent *event) Q_DECL_OVERRIDE;
-    QVariant inputMethodQuery(Qt::InputMethodQuery) const Q_DECL_OVERRIDE;
+    bool event(QEvent *event) override;
+    QVariant inputMethodQuery(Qt::InputMethodQuery) const override;
     Q_INVOKABLE QVariant inputMethodQuery(Qt::InputMethodQuery query, const QVariant &argument) const;
 
 public Q_SLOTS:
@@ -216,32 +230,42 @@ public Q_SLOTS:
 Q_SIGNALS:
     void editTextChanged(const QString &);
     void activated(int index);
-    void activated(const QString &);
+    void textActivated(const QString &);
     void highlighted(int index);
-    void highlighted(const QString &);
+    void textHighlighted(const QString &);
     void currentIndexChanged(int index);
+#if QT_DEPRECATED_SINCE(5, 15)
+    QT_DEPRECATED_VERSION_X_5_15(
+            "Use currentIndexChanged(int) instead, and get the text using itemText(index)")
     void currentIndexChanged(const QString &);
+#endif
     void currentTextChanged(const QString &);
+#if QT_DEPRECATED_SINCE(5, 15)
+    QT_DEPRECATED_VERSION_X(5, 15, "Use textActivated() instead")
+    void activated(const QString &);
+    QT_DEPRECATED_VERSION_X(5, 15, "Use textHighlighted() instead")
+    void highlighted(const QString &);
+#endif
 
 protected:
-    void focusInEvent(QFocusEvent *e) Q_DECL_OVERRIDE;
-    void focusOutEvent(QFocusEvent *e) Q_DECL_OVERRIDE;
-    void changeEvent(QEvent *e) Q_DECL_OVERRIDE;
-    void resizeEvent(QResizeEvent *e) Q_DECL_OVERRIDE;
-    void paintEvent(QPaintEvent *e) Q_DECL_OVERRIDE;
-    void showEvent(QShowEvent *e) Q_DECL_OVERRIDE;
-    void hideEvent(QHideEvent *e) Q_DECL_OVERRIDE;
-    void mousePressEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
-    void mouseReleaseEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
-    void keyPressEvent(QKeyEvent *e) Q_DECL_OVERRIDE;
-    void keyReleaseEvent(QKeyEvent *e) Q_DECL_OVERRIDE;
+    void focusInEvent(QFocusEvent *e) override;
+    void focusOutEvent(QFocusEvent *e) override;
+    void changeEvent(QEvent *e) override;
+    void resizeEvent(QResizeEvent *e) override;
+    void paintEvent(QPaintEvent *e) override;
+    void showEvent(QShowEvent *e) override;
+    void hideEvent(QHideEvent *e) override;
+    void mousePressEvent(QMouseEvent *e) override;
+    void mouseReleaseEvent(QMouseEvent *e) override;
+    void keyPressEvent(QKeyEvent *e) override;
+    void keyReleaseEvent(QKeyEvent *e) override;
 #if QT_CONFIG(wheelevent)
-    void wheelEvent(QWheelEvent *e) Q_DECL_OVERRIDE;
+    void wheelEvent(QWheelEvent *e) override;
 #endif
 #ifndef QT_NO_CONTEXTMENU
-    void contextMenuEvent(QContextMenuEvent *e) Q_DECL_OVERRIDE;
+    void contextMenuEvent(QContextMenuEvent *e) override;
 #endif // QT_NO_CONTEXTMENU
-    void inputMethodEvent(QInputMethodEvent *) Q_DECL_OVERRIDE;
+    void inputMethodEvent(QInputMethodEvent *) override;
     void initStyleOption(QStyleOptionComboBox *option) const;
 
 

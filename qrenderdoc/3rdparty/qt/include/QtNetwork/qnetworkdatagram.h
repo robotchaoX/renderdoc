@@ -61,13 +61,13 @@ public:
     ~QNetworkDatagram()
     { if (d) destroy(d); }
 
-    QNetworkDatagram(QNetworkDatagram &&other) Q_DECL_NOTHROW
+    QNetworkDatagram(QNetworkDatagram &&other) noexcept
         : d(other.d)
-    { other.d = Q_NULLPTR; }
-    QNetworkDatagram &operator=(QNetworkDatagram &&other) Q_DECL_NOTHROW
+    { other.d = nullptr; }
+    QNetworkDatagram &operator=(QNetworkDatagram &&other) noexcept
     { swap(other); return *this; }
 
-    void swap(QNetworkDatagram &other) Q_DECL_NOTHROW
+    void swap(QNetworkDatagram &other) noexcept
     { qSwap(d, other.d); }
 
     void clear();
@@ -91,7 +91,7 @@ public:
     QByteArray data() const;
     void setData(const QByteArray &data);
 
-#ifdef Q_COMPILER_REF_QUALIFIERS
+#if defined(Q_COMPILER_REF_QUALIFIERS) || defined(Q_CLANG_QDOC)
     QNetworkDatagram makeReply(const QByteArray &payload) const &
     { return makeReply_helper(payload); }
     QNetworkDatagram makeReply(const QByteArray &payload) &&
