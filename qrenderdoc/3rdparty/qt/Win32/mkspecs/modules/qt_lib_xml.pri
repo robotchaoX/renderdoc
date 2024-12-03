@@ -1,4 +1,4 @@
-QT.xml.VERSION = 5.9.4
+QT.xml.VERSION = 5.15.16
 QT.xml.name = QtXml
 QT.xml.module = Qt5Xml
 QT.xml.libs = $$QT_MODULE_LIB_BASE
