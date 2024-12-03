@@ -1,41 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the QtNetwork module of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:LGPL$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 3 as published by the Free Software
-** Foundation and appearing in the file LICENSE.LGPL3 included in the
-** packaging of this file. Please review the following information to
-** ensure the GNU Lesser General Public License version 3 requirements
-** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 2.0 or (at your option) the GNU General
-** Public license version 3 or any later version approved by the KDE Free
-** Qt Foundation. The licenses are as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-2.0.html and
-** https://www.gnu.org/licenses/gpl-3.0.html.
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #ifndef QNETWORKREPLY_H
 #define QNETWORKREPLY_H
@@ -114,8 +78,8 @@ public:
     ~QNetworkReply();
 
     // reimplemented from QIODevice
-    virtual void close() Q_DECL_OVERRIDE;
-    virtual bool isSequential() const Q_DECL_OVERRIDE;
+    virtual void close() override;
+    virtual bool isSequential() const override;
 
     // like QAbstractSocket:
     qint64 readBufferSize() const;
@@ -133,17 +97,24 @@ public:
     QVariant header(QNetworkRequest::KnownHeaders header) const;
 
     // raw headers:
+#if QT_NETWORK_REMOVED_SINCE(6, 7)
     bool hasRawHeader(const QByteArray &headerName) const;
+#endif
+    bool hasRawHeader(QAnyStringView headerName) const;
     QList<QByteArray> rawHeaderList() const;
+#if QT_NETWORK_REMOVED_SINCE(6, 7)
     QByteArray rawHeader(const QByteArray &headerName) const;
+#endif
+    QByteArray rawHeader(QAnyStringView headerName) const;
 
     typedef QPair<QByteArray, QByteArray> RawHeaderPair;
     const QList<RawHeaderPair>& rawHeaderPairs() const;
+    QHttpHeaders headers() const;
 
     // attributes
     QVariant attribute(QNetworkRequest::Attribute code) const;
 
-#ifndef QT_NO_SSL
+#if QT_CONFIG(ssl)
     QSslConfiguration sslConfiguration() const;
     void setSslConfiguration(const QSslConfiguration &configuration);
     void ignoreSslErrors(const QList<QSslError> &errors);
@@ -154,10 +125,12 @@ public Q_SLOTS:
     virtual void ignoreSslErrors();
 
 Q_SIGNALS:
+    void socketStartedConnecting();
+    void requestSent();
     void metaDataChanged();
     void finished();
-    void error(QNetworkReply::NetworkError);
-#ifndef QT_NO_SSL
+    void errorOccurred(QNetworkReply::NetworkError);
+#if QT_CONFIG(ssl)
     void encrypted();
     void sslErrors(const QList<QSslError> &errors);
     void preSharedKeyAuthenticationRequired(QSslPreSharedKeyAuthenticator *authenticator);
@@ -169,9 +142,9 @@ Q_SIGNALS:
     void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
 
 protected:
-    explicit QNetworkReply(QObject *parent = Q_NULLPTR);
+    explicit QNetworkReply(QObject *parent = nullptr);
     QNetworkReply(QNetworkReplyPrivate &dd, QObject *parent);
-    virtual qint64 writeData(const char *data, qint64 len) Q_DECL_OVERRIDE;
+    virtual qint64 writeData(const char *data, qint64 len) override;
 
     void setOperation(QNetworkAccessManager::Operation operation);
     void setRequest(const QNetworkRequest &request);
@@ -180,11 +153,16 @@ protected:
     void setUrl(const QUrl &url);
     void setHeader(QNetworkRequest::KnownHeaders header, const QVariant &value);
     void setRawHeader(const QByteArray &headerName, const QByteArray &value);
+    void setHeaders(const QHttpHeaders &newHeaders);
+    void setHeaders(QHttpHeaders &&newHeaders);
+    void setWellKnownHeader(QHttpHeaders::WellKnownHeader name, QByteArrayView value);
     void setAttribute(QNetworkRequest::Attribute code, const QVariant &value);
 
+#if QT_CONFIG(ssl)
     virtual void sslConfigurationImplementation(QSslConfiguration &) const;
     virtual void setSslConfigurationImplementation(const QSslConfiguration &);
     virtual void ignoreSslErrorsImplementation(const QList<QSslError> &);
+#endif
 
 private:
     Q_DECLARE_PRIVATE(QNetworkReply)
@@ -192,6 +170,7 @@ private:
 
 QT_END_NAMESPACE
 
-Q_DECLARE_METATYPE(QNetworkReply::NetworkError)
+QT_DECL_METATYPE_EXTERN_TAGGED(QNetworkReply::NetworkError,
+                               QNetworkReply__NetworkError, Q_NETWORK_EXPORT)
 
 #endif

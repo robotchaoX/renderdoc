@@ -1,10 +1,31 @@
 
 defineReplace(qtPlatformTargetSuffix) {
+    config_variable = $$1
+    isEmpty(config_variable): \
+        config_variable = CONFIG
+
     suffix =
-    CONFIG(debug, debug|release) {
-        !debug_and_release|build_pass {
-            mac: return($${suffix}_debug)
-            win32: return($${suffix}d)
+    android: return($${suffix}_$${QT_ARCH})
+    win32 {
+        contains($$config_variable, debug, debug|release) {
+            mingw {
+                qtConfig(debug_and_release):build_pass: \
+                    return($${suffix}d)
+            } else {
+                !debug_and_release|build_pass: \
+                    return($${suffix}d)
+            }
+        }
+    }
+    darwin {
+        contains($$config_variable, debug, debug|release) {
+            debug_and_release {
+                build_pass: \
+                    return($${suffix}_debug)
+            } else {
+                !qtConfig(framework): \
+                    return($${suffix}_debug)
+            }
         }
     }
     return($$suffix)
@@ -20,7 +41,13 @@ defineReplace(qtLibraryTarget) {
 }
 
 defineReplace(qt5LibraryTarget) {
-   LIBRARY_NAME = $$qtLibraryTarget($$1)
+   android {
+        LIBRARY_NAME_PREFIX = $$2
+        LIBRARY_NAME_PREFIX = $$replace(LIBRARY_NAME_PREFIX, "//", "/")
+        LIBRARY_NAME_PREFIX = $$replace(LIBRARY_NAME_PREFIX, "/", "_")
+        LIBRARY_NAME = $$LIBRARY_NAME_PREFIX$$qtLibraryTarget($$1)
+        unset(LIBRARY_NAME_PREFIX)
+   } else: LIBRARY_NAME = $$qtLibraryTarget($$1)
    isEmpty(QMAKE_FRAMEWORK_BUNDLE_NAME) {
        # Insert the major version of Qt in the library name
        # unless it's a framework build.
@@ -65,11 +92,19 @@ defineTest(qtHaveModule) {
     return(false)
 }
 
-# variable, default, [suffix for variable for system() use], [prepare primary variable for system() use]
+# Arguments:
+#     variable, default, [suffix for variable for system() use],
+#     [prepare primary variable for system() use],
+#     [installation location; default: $$[QT_HOST_BINS]]
 defineTest(qtPrepareTool) {
     cmd = $$eval(QT_TOOL.$${2}.binary)
     isEmpty(cmd) {
-        cmd = $$[QT_HOST_BINS]/$$2
+        isEmpty(5) {
+            instloc = $$[QT_HOST_BINS]
+        } else {
+            instloc = $$5
+        }
+        cmd = $$instloc/$$2
         exists($${cmd}.pl) {
             $${1}_EXE = $${cmd}.pl
             cmd = perl -w $$system_path($${cmd}.pl)
@@ -103,6 +138,15 @@ defineTest(qtPrepareTool) {
             $$1 += $$shell_quote($$arg)
         qtAddTargetEnv($$1, QT_TOOL.$${2}.depends, )
     }
+}
+
+# Prepare a tool that's not supposed to be called manually by users but by the build system.
+#
+# Forwards its arguments to qtPrepareTool but defaults the installation location to
+# $$[QT_HOST_LIBEXECS]
+defineTest(qtPrepareLibExecTool) {
+    isEmpty(instloc): instloc = "$$[QT_HOST_LIBEXECS]"
+    qtPrepareTool($$1, $$2, $$3, $$4, $$instloc)
 }
 
 # target variable, list of env var names, [non-empty: prepare for system(), not make]
@@ -152,8 +196,12 @@ defineTest(qtAddToolEnv) {
         !isEmpty(cmd): cmd = "$$cmd "
         equals(ds, /) {
             batch_name = $${batch_name}.sh
+            equals(QMAKE_HOST.os, Darwin):exists(/bin/bash): \
+                shell = /bin/bash
+            else: \
+                shell = /bin/sh
             batch_cont = \
-                "$$LITERAL_HASH!/bin/sh" \
+                "$$LITERAL_HASH!$$shell" \
                 $$batch_sets \
                 "exec $$cmd\"$@\""
             # It would be nicer to use the '.' command (without 'exec' above),

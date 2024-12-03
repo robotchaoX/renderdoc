@@ -1,41 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the QtNetwork module of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:LGPL$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 3 as published by the Free Software
-** Foundation and appearing in the file LICENSE.LGPL3 included in the
-** packaging of this file. Please review the following information to
-** ensure the GNU Lesser General Public License version 3 requirements
-** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 2.0 or (at your option) the GNU General
-** Public license version 3 or any later version approved by the KDE Free
-** Qt Foundation. The licenses are as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-2.0.html and
-** https://www.gnu.org/licenses/gpl-3.0.html.
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #ifndef QHTTPMULTIPART_H
 #define QHTTPMULTIPART_H
@@ -46,11 +10,16 @@
 #include <QtCore/QIODevice>
 #include <QtNetwork/QNetworkRequest>
 
+#ifndef Q_OS_WASM
+QT_REQUIRE_CONFIG(http);
+#endif
+
 QT_BEGIN_NAMESPACE
 
 
 class QHttpPartPrivate;
 class QHttpMultiPart;
+class QDebug;
 
 class Q_NETWORK_EXPORT QHttpPart
 {
@@ -58,12 +27,10 @@ public:
     QHttpPart();
     QHttpPart(const QHttpPart &other);
     ~QHttpPart();
-#ifdef Q_COMPILER_RVALUE_REFS
-    QHttpPart &operator=(QHttpPart &&other) Q_DECL_NOTHROW { swap(other); return *this; }
-#endif
+    QHttpPart &operator=(QHttpPart &&other) noexcept { swap(other); return *this; }
     QHttpPart &operator=(const QHttpPart &other);
 
-    void swap(QHttpPart &other) Q_DECL_NOTHROW { qSwap(d, other.d); }
+    void swap(QHttpPart &other) noexcept { d.swap(other.d); }
 
     bool operator==(const QHttpPart &other) const;
     inline bool operator!=(const QHttpPart &other) const
@@ -79,6 +46,9 @@ private:
     QSharedDataPointer<QHttpPartPrivate> d;
 
     friend class QHttpMultiPartIODevice;
+#ifndef QT_NO_DEBUG_STREAM
+    friend Q_NETWORK_EXPORT QDebug operator<<(QDebug debug, const QHttpPart &httpPart);
+#endif
 };
 
 Q_DECLARE_SHARED(QHttpPart)
@@ -98,8 +68,8 @@ public:
         AlternativeType
     };
 
-    explicit QHttpMultiPart(QObject *parent = Q_NULLPTR);
-    explicit QHttpMultiPart(ContentType contentType, QObject *parent = Q_NULLPTR);
+    explicit QHttpMultiPart(QObject *parent = nullptr);
+    explicit QHttpMultiPart(ContentType contentType, QObject *parent = nullptr);
     ~QHttpMultiPart();
 
     void append(const QHttpPart &httpPart);

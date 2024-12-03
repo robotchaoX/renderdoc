@@ -1,41 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the QtWidgets module of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:LGPL$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 3 as published by the Free Software
-** Foundation and appearing in the file LICENSE.LGPL3 included in the
-** packaging of this file. Please review the following information to
-** ensure the GNU Lesser General Public License version 3 requirements
-** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 2.0 or (at your option) the GNU General
-** Public license version 3 or any later version approved by the KDE Free
-** Qt Foundation. The licenses are as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-2.0.html and
-** https://www.gnu.org/licenses/gpl-3.0.html.
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
+// Copyright (C) 2019 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #ifndef QTEXTEDIT_H
 #define QTEXTEDIT_H
@@ -57,6 +21,7 @@ class QMenu;
 class QTextEditPrivate;
 class QMimeData;
 class QPagedPaintDevice;
+class QRegularExpression;
 
 class Q_WIDGETS_EXPORT QTextEdit : public QAbstractScrollArea
 {
@@ -70,15 +35,19 @@ class Q_WIDGETS_EXPORT QTextEdit : public QAbstractScrollArea
     QDOC_PROPERTY(QTextOption::WrapMode wordWrapMode READ wordWrapMode WRITE setWordWrapMode)
     Q_PROPERTY(int lineWrapColumnOrWidth READ lineWrapColumnOrWidth WRITE setLineWrapColumnOrWidth)
     Q_PROPERTY(bool readOnly READ isReadOnly WRITE setReadOnly)
+#if QT_CONFIG(textmarkdownreader) && QT_CONFIG(textmarkdownwriter)
+    Q_PROPERTY(QString markdown READ toMarkdown WRITE setMarkdown NOTIFY textChanged)
+#endif
 #ifndef QT_NO_TEXTHTMLPARSER
     Q_PROPERTY(QString html READ toHtml WRITE setHtml NOTIFY textChanged USER true)
 #endif
     Q_PROPERTY(QString plainText READ toPlainText WRITE setPlainText DESIGNABLE false)
     Q_PROPERTY(bool overwriteMode READ overwriteMode WRITE setOverwriteMode)
-    Q_PROPERTY(int tabStopWidth READ tabStopWidth WRITE setTabStopWidth)
+    Q_PROPERTY(qreal tabStopDistance READ tabStopDistance WRITE setTabStopDistance)
     Q_PROPERTY(bool acceptRichText READ acceptRichText WRITE setAcceptRichText)
     Q_PROPERTY(int cursorWidth READ cursorWidth WRITE setCursorWidth)
-    Q_PROPERTY(Qt::TextInteractionFlags textInteractionFlags READ textInteractionFlags WRITE setTextInteractionFlags)
+    Q_PROPERTY(Qt::TextInteractionFlags textInteractionFlags READ textInteractionFlags
+               WRITE setTextInteractionFlags)
     Q_PROPERTY(QTextDocument *document READ document WRITE setDocument DESIGNABLE false)
     Q_PROPERTY(QString placeholderText READ placeholderText WRITE setPlaceholderText)
 public:
@@ -99,8 +68,8 @@ public:
     Q_DECLARE_FLAGS(AutoFormatting, AutoFormattingFlag)
     Q_FLAG(AutoFormatting)
 
-    explicit QTextEdit(QWidget *parent = Q_NULLPTR);
-    explicit QTextEdit(const QString &text, QWidget *parent = Q_NULLPTR);
+    explicit QTextEdit(QWidget *parent = nullptr);
+    explicit QTextEdit(const QString &text, QWidget *parent = nullptr);
     virtual ~QTextEdit();
 
     void setDocument(QTextDocument *document);
@@ -159,13 +128,16 @@ public:
     void setWordWrapMode(QTextOption::WrapMode policy);
 
     bool find(const QString &exp, QTextDocument::FindFlags options = QTextDocument::FindFlags());
-#ifndef QT_NO_REGEXP
-    bool find(const QRegExp &exp, QTextDocument::FindFlags options = QTextDocument::FindFlags());
+#if QT_CONFIG(regularexpression)
+    bool find(const QRegularExpression &exp, QTextDocument::FindFlags options = QTextDocument::FindFlags());
 #endif
 
     QString toPlainText() const;
 #ifndef QT_NO_TEXTHTMLPARSER
     QString toHtml() const;
+#endif
+#if QT_CONFIG(textmarkdownwriter)
+    QString toMarkdown(QTextDocument::MarkdownFeatures features = QTextDocument::MarkdownDialectGitHub) const;
 #endif
 
     void ensureCursorVisible();
@@ -185,8 +157,8 @@ public:
     bool overwriteMode() const;
     void setOverwriteMode(bool overwrite);
 
-    int tabStopWidth() const;
-    void setTabStopWidth(int width);
+    qreal tabStopDistance() const;
+    void setTabStopDistance(qreal distance);
 
     int cursorWidth() const;
     void setCursorWidth(int width);
@@ -208,7 +180,7 @@ public:
 
     void print(QPagedPaintDevice *printer) const;
 
-    QVariant inputMethodQuery(Qt::InputMethodQuery property) const Q_DECL_OVERRIDE;
+    QVariant inputMethodQuery(Qt::InputMethodQuery property) const override;
     Q_INVOKABLE QVariant inputMethodQuery(Qt::InputMethodQuery query, QVariant argument) const;
 
 public Q_SLOTS:
@@ -225,6 +197,9 @@ public Q_SLOTS:
     void setPlainText(const QString &text);
 #ifndef QT_NO_TEXTHTMLPARSER
     void setHtml(const QString &text);
+#endif
+#if QT_CONFIG(textmarkdownreader)
+    void setMarkdown(const QString &markdown);
 #endif
     void setText(const QString &text);
 
@@ -262,54 +237,49 @@ Q_SIGNALS:
     void cursorPositionChanged();
 
 protected:
-    virtual bool event(QEvent *e) Q_DECL_OVERRIDE;
-    virtual void timerEvent(QTimerEvent *e) Q_DECL_OVERRIDE;
-    virtual void keyPressEvent(QKeyEvent *e) Q_DECL_OVERRIDE;
-    virtual void keyReleaseEvent(QKeyEvent *e) Q_DECL_OVERRIDE;
-    virtual void resizeEvent(QResizeEvent *e) Q_DECL_OVERRIDE;
-    virtual void paintEvent(QPaintEvent *e) Q_DECL_OVERRIDE;
-    virtual void mousePressEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
-    virtual void mouseMoveEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
-    virtual void mouseReleaseEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
-    virtual void mouseDoubleClickEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
-    virtual bool focusNextPrevChild(bool next) Q_DECL_OVERRIDE;
+    virtual bool event(QEvent *e) override;
+    virtual void timerEvent(QTimerEvent *e) override;
+    virtual void keyPressEvent(QKeyEvent *e) override;
+    virtual void keyReleaseEvent(QKeyEvent *e) override;
+    virtual void resizeEvent(QResizeEvent *e) override;
+    virtual void paintEvent(QPaintEvent *e) override;
+    virtual void mousePressEvent(QMouseEvent *e) override;
+    virtual void mouseMoveEvent(QMouseEvent *e) override;
+    virtual void mouseReleaseEvent(QMouseEvent *e) override;
+    virtual void mouseDoubleClickEvent(QMouseEvent *e) override;
+    virtual bool focusNextPrevChild(bool next) override;
 #ifndef QT_NO_CONTEXTMENU
-    virtual void contextMenuEvent(QContextMenuEvent *e) Q_DECL_OVERRIDE;
+    virtual void contextMenuEvent(QContextMenuEvent *e) override;
 #endif
-#ifndef QT_NO_DRAGANDDROP
-    virtual void dragEnterEvent(QDragEnterEvent *e) Q_DECL_OVERRIDE;
-    virtual void dragLeaveEvent(QDragLeaveEvent *e) Q_DECL_OVERRIDE;
-    virtual void dragMoveEvent(QDragMoveEvent *e) Q_DECL_OVERRIDE;
-    virtual void dropEvent(QDropEvent *e) Q_DECL_OVERRIDE;
+#if QT_CONFIG(draganddrop)
+    virtual void dragEnterEvent(QDragEnterEvent *e) override;
+    virtual void dragLeaveEvent(QDragLeaveEvent *e) override;
+    virtual void dragMoveEvent(QDragMoveEvent *e) override;
+    virtual void dropEvent(QDropEvent *e) override;
 #endif
-    virtual void focusInEvent(QFocusEvent *e) Q_DECL_OVERRIDE;
-    virtual void focusOutEvent(QFocusEvent *e) Q_DECL_OVERRIDE;
-    virtual void showEvent(QShowEvent *) Q_DECL_OVERRIDE;
-    virtual void changeEvent(QEvent *e) Q_DECL_OVERRIDE;
+    virtual void focusInEvent(QFocusEvent *e) override;
+    virtual void focusOutEvent(QFocusEvent *e) override;
+    virtual void showEvent(QShowEvent *) override;
+    virtual void changeEvent(QEvent *e) override;
 #if QT_CONFIG(wheelevent)
-    virtual void wheelEvent(QWheelEvent *e) Q_DECL_OVERRIDE;
+    virtual void wheelEvent(QWheelEvent *e) override;
 #endif
 
     virtual QMimeData *createMimeDataFromSelection() const;
     virtual bool canInsertFromMimeData(const QMimeData *source) const;
     virtual void insertFromMimeData(const QMimeData *source);
 
-    virtual void inputMethodEvent(QInputMethodEvent *) Q_DECL_OVERRIDE;
+    virtual void inputMethodEvent(QInputMethodEvent *) override;
 
     QTextEdit(QTextEditPrivate &dd, QWidget *parent);
 
-    virtual void scrollContentsBy(int dx, int dy) Q_DECL_OVERRIDE;
+    virtual void scrollContentsBy(int dx, int dy) override;
     virtual void doSetTextCursor(const QTextCursor &cursor);
 
     void zoomInF(float range);
 
 private:
     Q_DISABLE_COPY(QTextEdit)
-    Q_PRIVATE_SLOT(d_func(), void _q_repaintContents(const QRectF &r))
-    Q_PRIVATE_SLOT(d_func(), void _q_currentCharFormatChanged(const QTextCharFormat &))
-    Q_PRIVATE_SLOT(d_func(), void _q_adjustScrollbars())
-    Q_PRIVATE_SLOT(d_func(), void _q_ensureVisible(const QRectF &))
-    Q_PRIVATE_SLOT(d_func(), void _q_cursorPositionChanged())
     friend class QTextEditControl;
     friend class QTextDocument;
     friend class QWidgetTextControl;

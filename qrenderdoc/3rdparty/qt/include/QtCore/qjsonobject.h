@@ -1,78 +1,45 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the QtCore module of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:LGPL$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 3 as published by the Free Software
-** Foundation and appearing in the file LICENSE.LGPL3 included in the
-** packaging of this file. Please review the following information to
-** ensure the GNU Lesser General Public License version 3 requirements
-** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 2.0 or (at your option) the GNU General
-** Public license version 3 or any later version approved by the KDE Free
-** Qt Foundation. The licenses are as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-2.0.html and
-** https://www.gnu.org/licenses/gpl-3.0.html.
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #ifndef QJSONOBJECT_H
 #define QJSONOBJECT_H
 
 #include <QtCore/qjsonvalue.h>
 #include <QtCore/qiterator.h>
-#ifdef Q_COMPILER_INITIALIZER_LISTS
 #include <QtCore/qpair.h>
+#include <QtCore/qshareddata.h>
 #include <initializer_list>
-#endif
 
 QT_BEGIN_NAMESPACE
 
 class QDebug;
-template <class Key, class T> class QMap;
-typedef QMap<QString, QVariant> QVariantMap;
-template <class Key, class T> class QHash;
-typedef QHash<QString, QVariant> QVariantHash;
+
+class QCborContainerPrivate;
 
 class Q_CORE_EXPORT QJsonObject
 {
 public:
     QJsonObject();
 
-#if defined(Q_COMPILER_INITIALIZER_LISTS) || defined(Q_QDOC)
-    QJsonObject(std::initializer_list<QPair<QString, QJsonValue> > args)
-    {
-        initialize();
-        for (std::initializer_list<QPair<QString, QJsonValue> >::const_iterator i = args.begin(); i != args.end(); ++i)
-            insert(i->first, i->second);
-    }
-#endif
+    QJsonObject(std::initializer_list<std::pair<QString, QJsonValue> > args);
 
     ~QJsonObject();
 
-    QJsonObject(const QJsonObject &other);
-    QJsonObject &operator =(const QJsonObject &other);
+    QJsonObject(const QJsonObject &other) noexcept;
+    QJsonObject &operator =(const QJsonObject &other) noexcept;
+
+    QJsonObject(QJsonObject &&other) noexcept;
+
+    QJsonObject &operator =(QJsonObject &&other) noexcept
+    {
+        swap(other);
+        return *this;
+    }
+
+    void swap(QJsonObject &other) noexcept
+    {
+        o.swap(other.o);
+    }
 
     static QJsonObject fromVariantMap(const QVariantMap &map);
     QVariantMap toVariantMap() const;
@@ -80,122 +47,243 @@ public:
     QVariantHash toVariantHash() const;
 
     QStringList keys() const;
-    int size() const;
-    inline int count() const { return size(); }
-    inline int length() const { return size(); }
+    qsizetype size() const;
+    inline qsizetype count() const { return size(); }
+    inline qsizetype length() const { return size(); }
     bool isEmpty() const;
 
     QJsonValue value(const QString &key) const;
-    QJsonValue value(QLatin1String key) const;
     QJsonValue operator[] (const QString &key) const;
-    QJsonValue operator[] (QLatin1String key) const { return value(key); }
     QJsonValueRef operator[] (const QString &key);
-    QJsonValueRef operator[] (QLatin1String key);
+    QJsonValue value(QStringView key) const;
+    QJsonValue value(QLatin1StringView key) const;
+    QJsonValue operator[] (QStringView key) const { return value(key); }
+    QJsonValue operator[] (QLatin1StringView key) const { return value(key); }
+    QJsonValueRef operator[] (QStringView key);
+    QJsonValueRef operator[] (QLatin1StringView key);
 
     void remove(const QString &key);
     QJsonValue take(const QString &key);
     bool contains(const QString &key) const;
-    bool contains(QLatin1String key) const;
+    void remove(QStringView key);
+    void remove(QLatin1StringView key);
+    QJsonValue take(QStringView key);
+    QJsonValue take(QLatin1StringView key);
+    bool contains(QStringView key) const;
+    bool contains(QLatin1StringView key) const;
 
+#if QT_CORE_REMOVED_SINCE(6, 8)
     bool operator==(const QJsonObject &other) const;
     bool operator!=(const QJsonObject &other) const;
-
+#endif
     class const_iterator;
 
     class iterator
     {
         friend class const_iterator;
         friend class QJsonObject;
-        QJsonObject *o;
-        int i;
+        QJsonValueRef item;
 
     public:
         typedef std::random_access_iterator_tag iterator_category;
-        typedef int difference_type;
+        typedef qsizetype difference_type;
         typedef QJsonValue value_type;
         typedef QJsonValueRef reference;
-        typedef QJsonValuePtr pointer;
+        typedef QJsonValueRef *pointer;
 
-        Q_DECL_CONSTEXPR inline iterator() : o(Q_NULLPTR), i(0) {}
-        Q_DECL_CONSTEXPR inline iterator(QJsonObject *obj, int index) : o(obj), i(index) {}
+        inline iterator() : item(static_cast<QJsonObject*>(nullptr), 0) { }
+        inline iterator(QJsonObject *obj, qsizetype index) : item(obj, index) { }
 
-        inline QString key() const { return o->keyAt(i); }
-        inline QJsonValueRef value() const { return QJsonValueRef(o, i); }
-        inline QJsonValueRef operator*() const { return QJsonValueRef(o, i); }
-#ifdef Q_QDOC
-        inline QJsonValueRef* operator->() const;
-#else
-        inline QJsonValueRefPtr operator->() const { return QJsonValueRefPtr(o, i); }
+        constexpr iterator(const iterator &other) = default;
+        iterator &operator=(const iterator &other)
+        {
+            item.rebind(other.item);
+            return *this;
+        }
+
+        inline QString key() const { return item.objectKey(); }
+        inline QJsonValueRef value() const { return item; }
+        inline QJsonValueRef operator*() const { return item; }
+        inline const QJsonValueConstRef *operator->() const { return &item; }
+        inline QJsonValueRef *operator->() { return &item; }
+        inline QJsonValueRef operator[](qsizetype j) const { return *(*this + j); }
+#if QT_CORE_REMOVED_SINCE(6, 8)
+        inline bool operator==(const iterator &other) const
+        { return item.d == other.item.d && item.index == other.item.index; }
+        inline bool operator!=(const iterator &other) const { return !operator==(other); }
+        bool operator<(const iterator& other) const
+        { Q_ASSERT(item.d == other.item.d); return item.index < other.item.index; }
+        bool operator<=(const iterator& other) const
+        { Q_ASSERT(item.d == other.item.d); return item.index <= other.item.index; }
+        bool operator>(const iterator& other) const { return !operator<=(other); }
+        bool operator>=(const iterator& other) const { return !operator<(other); }
 #endif
-        inline bool operator==(const iterator &other) const { return i == other.i; }
-        inline bool operator!=(const iterator &other) const { return i != other.i; }
-
-        inline iterator &operator++() { ++i; return *this; }
-        inline iterator operator++(int) { iterator r = *this; ++i; return r; }
-        inline iterator &operator--() { --i; return *this; }
-        inline iterator operator--(int) { iterator r = *this; --i; return r; }
-        inline iterator operator+(int j) const
-        { iterator r = *this; r.i += j; return r; }
-        inline iterator operator-(int j) const { return operator+(-j); }
-        inline iterator &operator+=(int j) { i += j; return *this; }
-        inline iterator &operator-=(int j) { i -= j; return *this; }
+        inline iterator &operator++() { ++item.index; return *this; }
+        inline iterator operator++(int) { iterator r = *this; ++item.index; return r; }
+        inline iterator &operator--() { --item.index; return *this; }
+        inline iterator operator--(int) { iterator r = *this; --item.index; return r; }
+        inline iterator operator+(qsizetype j) const { iterator r = *this; return r += j; }
+        inline iterator operator-(qsizetype j) const { return operator+(-j); }
+        inline iterator &operator+=(qsizetype j) { item.index += quint64(j); return *this; }
+        inline iterator &operator-=(qsizetype j) { item.index -= quint64(j); return *this; }
+        qsizetype operator-(iterator j) const { return item.index - j.item.index; }
 
     public:
-        inline bool operator==(const const_iterator &other) const { return i == other.i; }
-        inline bool operator!=(const const_iterator &other) const { return i != other.i; }
+#if QT_CORE_REMOVED_SINCE(6, 8)
+        inline bool operator==(const const_iterator &other) const
+        { return item.d == other.item.d && item.index == other.item.index; }
+        inline bool operator!=(const const_iterator &other) const { return !operator==(other); }
+        bool operator<(const const_iterator& other) const
+        { Q_ASSERT(item.d == other.item.d); return item.index < other.item.index; }
+        bool operator<=(const const_iterator& other) const
+        { Q_ASSERT(item.d == other.item.d); return item.index <= other.item.index; }
+        bool operator>(const const_iterator& other) const { return operator<=(other); }
+        bool operator>=(const const_iterator& other) const { return operator<(other); }
+#endif
+    private:
+        // Helper functions
+        static bool comparesEqual_helper(const iterator &lhs, const iterator &rhs) noexcept
+        {
+            return lhs.item.d == rhs.item.d && lhs.item.index == rhs.item.index;
+        }
+        static bool comparesEqual_helper(const iterator &lhs, const const_iterator &rhs) noexcept
+        {
+            return lhs.item.d == rhs.item.d && lhs.item.index == rhs.item.index;
+        }
+
+        static Qt::strong_ordering compareThreeWay_helper(const iterator &lhs,
+                                                          const iterator &rhs)
+        {
+            Q_ASSERT(lhs.item.d == rhs.item.d);
+            return Qt::compareThreeWay(lhs.item.index, rhs.item.index);
+        }
+        static Qt::strong_ordering compareThreeWay_helper(const iterator &lhs,
+                                                          const const_iterator &rhs)
+        {
+            Q_ASSERT(lhs.item.d == rhs.item.d);
+            return Qt::compareThreeWay(lhs.item.index, rhs.item.index);
+        }
+
+        // Compare friends
+        friend bool comparesEqual(const iterator &lhs, const iterator &rhs) noexcept
+        {
+            return comparesEqual_helper(lhs, rhs);
+        }
+        friend Qt::strong_ordering compareThreeWay(const iterator &lhs,
+                                                   const iterator &rhs)
+        {
+            return compareThreeWay_helper(lhs, rhs);
+        }
+        Q_DECLARE_STRONGLY_ORDERED_NON_NOEXCEPT(iterator)
+
+        friend bool comparesEqual(const iterator &lhs, const const_iterator &rhs) noexcept
+        {
+            return comparesEqual_helper(lhs, rhs);
+        }
+        friend Qt::strong_ordering compareThreeWay(const iterator &lhs,
+                                                   const const_iterator &rhs)
+        {
+            return compareThreeWay_helper(lhs, rhs);
+        }
+        Q_DECLARE_STRONGLY_ORDERED_NON_NOEXCEPT(iterator, const_iterator)
     };
     friend class iterator;
 
     class const_iterator
     {
         friend class iterator;
-        const QJsonObject *o;
-        int i;
+        QJsonValueConstRef item;
 
     public:
         typedef std::random_access_iterator_tag iterator_category;
-        typedef int difference_type;
+        typedef qsizetype difference_type;
         typedef QJsonValue value_type;
-        typedef QJsonValue reference;
-        typedef QJsonValuePtr pointer;
+        typedef const QJsonValueConstRef reference;
+        typedef const QJsonValueConstRef *pointer;
 
-        Q_DECL_CONSTEXPR inline const_iterator() : o(Q_NULLPTR), i(0) {}
-        Q_DECL_CONSTEXPR inline const_iterator(const QJsonObject *obj, int index)
-            : o(obj), i(index) {}
+        inline const_iterator() : item(static_cast<QJsonObject*>(nullptr), 0) { }
+        inline const_iterator(const QJsonObject *obj, qsizetype index)
+            : item(const_cast<QJsonObject*>(obj), index) { }
         inline const_iterator(const iterator &other)
-            : o(other.o), i(other.i) {}
+            : item(other.item) { }
 
-        inline QString key() const { return o->keyAt(i); }
-        inline QJsonValue value() const { return o->valueAt(i); }
-        inline QJsonValue operator*() const { return o->valueAt(i); }
-#ifdef Q_QDOC
-        inline QJsonValue* operator->() const;
-#else
-        inline QJsonValuePtr operator->() const { return QJsonValuePtr(o->valueAt(i)); }
+        constexpr const_iterator(const const_iterator &other) = default;
+        const_iterator &operator=(const const_iterator &other)
+        {
+            item.rebind(other.item);
+            return *this;
+        }
+
+        inline QString key() const { return item.objectKey(); }
+        inline QJsonValueConstRef value() const { return item; }
+        inline const QJsonValueConstRef operator*() const { return item; }
+        inline const QJsonValueConstRef *operator->() const { return &item; }
+        inline QJsonValueConstRef operator[](qsizetype j) const { return *(*this + j); }
+#if QT_CORE_REMOVED_SINCE(6, 8)
+        inline bool operator==(const const_iterator &other) const
+        { return item.d == other.item.d && item.index == other.item.index; }
+        inline bool operator!=(const const_iterator &other) const { return !operator==(other); }
+        bool operator<(const const_iterator& other) const
+        { Q_ASSERT(item.d == other.item.d); return item.index < other.item.index; }
+        bool operator<=(const const_iterator& other) const
+        { Q_ASSERT(item.d == other.item.d); return item.index <= other.item.index; }
+        bool operator>(const const_iterator& other) const { return !operator<=(other); }
+        bool operator>=(const const_iterator& other) const { return !operator<(other); }
 #endif
-        inline bool operator==(const const_iterator &other) const { return i == other.i; }
-        inline bool operator!=(const const_iterator &other) const { return i != other.i; }
+        inline const_iterator &operator++() { ++item.index; return *this; }
+        inline const_iterator operator++(int) { const_iterator r = *this; ++item.index; return r; }
+        inline const_iterator &operator--() { --item.index; return *this; }
+        inline const_iterator operator--(int) { const_iterator r = *this; --item.index; return r; }
+        inline const_iterator operator+(qsizetype j) const { const_iterator r = *this; return r += j; }
+        inline const_iterator operator-(qsizetype j) const { return operator+(-j); }
+        inline const_iterator &operator+=(qsizetype j) { item.index += quint64(j); return *this; }
+        inline const_iterator &operator-=(qsizetype j) { item.index -= quint64(j); return *this; }
+        qsizetype operator-(const_iterator j) const { return item.index - j.item.index; }
+#if QT_CORE_REMOVED_SINCE(6, 8)
+        inline bool operator==(const iterator &other) const
+        { return item.d == other.item.d && item.index == other.item.index; }
+        inline bool operator!=(const iterator &other) const { return !operator==(other); }
+        bool operator<(const iterator& other) const
+        { Q_ASSERT(item.d == other.item.d); return item.index < other.item.index; }
+        bool operator<=(const iterator& other) const
+        { Q_ASSERT(item.d == other.item.d); return item.index <= other.item.index; }
+        bool operator>(const iterator& other) const { return !operator<=(other); }
+        bool operator>=(const iterator& other) const { return !operator<(other); }
+#endif
 
-        inline const_iterator &operator++() { ++i; return *this; }
-        inline const_iterator operator++(int) { const_iterator r = *this; ++i; return r; }
-        inline const_iterator &operator--() { --i; return *this; }
-        inline const_iterator operator--(int) { const_iterator r = *this; --i; return r; }
-        inline const_iterator operator+(int j) const
-        { const_iterator r = *this; r.i += j; return r; }
-        inline const_iterator operator-(int j) const { return operator+(-j); }
-        inline const_iterator &operator+=(int j) { i += j; return *this; }
-        inline const_iterator &operator-=(int j) { i -= j; return *this; }
+    private:
+        // Helper functions
+        static bool comparesEqual_helper(const const_iterator &lhs,
+                                         const const_iterator &rhs) noexcept
+        {
+            return lhs.item.d == rhs.item.d && lhs.item.index == rhs.item.index;
+        }
+        static Qt::strong_ordering compareThreeWay_helper(const const_iterator &lhs,
+                                                          const const_iterator &rhs)
+        {
+            Q_ASSERT(lhs.item.d == rhs.item.d);
+            return Qt::compareThreeWay(lhs.item.index, rhs.item.index);
+        }
 
-        inline bool operator==(const iterator &other) const { return i == other.i; }
-        inline bool operator!=(const iterator &other) const { return i != other.i; }
+        // Compare friends
+        friend bool comparesEqual(const const_iterator &lhs, const const_iterator &rhs) noexcept
+        {
+            return comparesEqual_helper(lhs, rhs);
+        }
+        friend Qt::strong_ordering compareThreeWay(const const_iterator &lhs,
+                                                   const const_iterator &rhs)
+        {
+            return compareThreeWay_helper(lhs, rhs);
+        }
+        Q_DECLARE_STRONGLY_ORDERED_NON_NOEXCEPT(const_iterator)
     };
     friend class const_iterator;
 
     // STL style
-    inline iterator begin() { detach2(); return iterator(this, 0); }
+    inline iterator begin() { detach(); return iterator(this, 0); }
     inline const_iterator begin() const { return const_iterator(this, 0); }
     inline const_iterator constBegin() const { return const_iterator(this, 0); }
-    inline iterator end() { detach2(); return iterator(this, size()); }
+    inline iterator end() { detach(); return iterator(this, size()); }
     inline const_iterator end() const { return const_iterator(this, size()); }
     inline const_iterator constEnd() const { return const_iterator(this, size()); }
     iterator erase(iterator it);
@@ -204,45 +292,87 @@ public:
     typedef iterator Iterator;
     typedef const_iterator ConstIterator;
     iterator find(const QString &key);
-    iterator find(QLatin1String key);
     const_iterator find(const QString &key) const { return constFind(key); }
-    const_iterator find(QLatin1String key) const { return constFind(key); }
     const_iterator constFind(const QString &key) const;
-    const_iterator constFind(QLatin1String key) const;
     iterator insert(const QString &key, const QJsonValue &value);
+    iterator find(QStringView key);
+    iterator find(QLatin1StringView key);
+    const_iterator find(QStringView key) const { return constFind(key); }
+    const_iterator find(QLatin1StringView key) const { return constFind(key); }
+    const_iterator constFind(QStringView key) const;
+    const_iterator constFind(QLatin1StringView key) const;
+    iterator insert(QStringView key, const QJsonValue &value);
+    iterator insert(QLatin1StringView key, const QJsonValue &value);
 
     // STL compatibility
     typedef QJsonValue mapped_type;
     typedef QString key_type;
-    typedef int size_type;
+    typedef qsizetype size_type;
 
     inline bool empty() const { return isEmpty(); }
 
 private:
-    friend class QJsonPrivate::Data;
+    friend Q_CORE_EXPORT bool comparesEqual(const QJsonObject &lhs,
+                                            const QJsonObject &rhs);
+    friend bool comparesEqual(const QJsonObject &lhs, const QJsonValue &rhs)
+    {
+        return comparesEqual(lhs, rhs.toObject());
+    }
+    friend bool comparesEqual(const QJsonObject &lhs, const QJsonValueConstRef &rhs)
+    {
+        return comparesEqual(lhs, rhs.toObject());
+    }
+    Q_DECLARE_EQUALITY_COMPARABLE_NON_NOEXCEPT(QJsonObject)
+    Q_DECLARE_EQUALITY_COMPARABLE_NON_NOEXCEPT(QJsonObject, QJsonValue)
+    Q_DECLARE_EQUALITY_COMPARABLE_NON_NOEXCEPT(QJsonObject, QJsonValueConstRef)
     friend class QJsonValue;
     friend class QJsonDocument;
+    friend class QJsonPrivate::Value;
+    friend class QJsonValueConstRef;
     friend class QJsonValueRef;
-
+    friend class QCborMap;
     friend Q_CORE_EXPORT QDebug operator<<(QDebug, const QJsonObject &);
 
-    QJsonObject(QJsonPrivate::Data *data, QJsonPrivate::Object *object);
-    void initialize();
-    // ### Qt 6: remove me and merge with detach2
-    void detach(uint reserve = 0);
-    bool detach2(uint reserve = 0);
-    void compact();
+    QJsonObject(QCborContainerPrivate *object);
+    bool detach(qsizetype reserve = 0);
 
-    QString keyAt(int i) const;
-    QJsonValue valueAt(int i) const;
-    void setValueAt(int i, const QJsonValue &val);
+    template <typename T> QJsonValue valueImpl(T key) const;
+    template <typename T> QJsonValueRef atImpl(T key);
+    template <typename T> void removeImpl(T key);
+    template <typename T> QJsonValue takeImpl(T key);
+    template <typename T> bool containsImpl(T key) const;
+    template <typename T> iterator findImpl(T key);
+    template <typename T> const_iterator constFindImpl(T key) const;
+    template <typename T> iterator insertImpl(T key, const QJsonValue &value);
 
-    QJsonPrivate::Data *d;
-    QJsonPrivate::Object *o;
+#if QT_VERSION < QT_VERSION_CHECK(7, 0, 0) && !defined(QT_BOOTSTRAPPED)
+    QString keyAt(qsizetype i) const;
+    QJsonValue valueAt(qsizetype i) const;
+    void setValueAt(qsizetype i, const QJsonValue &val);
+#endif
+    void removeAt(qsizetype i);
+    template <typename T> iterator insertAt(qsizetype i, T key, const QJsonValue &val, bool exists);
+
+    QExplicitlySharedDataPointer<QCborContainerPrivate> o;
 };
+
+Q_DECLARE_SHARED(QJsonObject)
+
+#if QT_VERSION >= QT_VERSION_CHECK(7, 0, 0) || defined(QT_BOOTSTRAPPED)
+inline QJsonValueConstRef::QJsonValueConstRef(QJsonObject *o, qsizetype idx)
+    : d(o ? o->o.data() : nullptr), is_object(true), index(idx)
+{}
+#endif
+
+Q_CORE_EXPORT size_t qHash(const QJsonObject &object, size_t seed = 0);
 
 #if !defined(QT_NO_DEBUG_STREAM) && !defined(QT_JSON_READONLY)
 Q_CORE_EXPORT QDebug operator<<(QDebug, const QJsonObject &);
+#endif
+
+#ifndef QT_NO_DATASTREAM
+Q_CORE_EXPORT QDataStream &operator<<(QDataStream &, const QJsonObject &);
+Q_CORE_EXPORT QDataStream &operator>>(QDataStream &, QJsonObject &);
 #endif
 
 QT_END_NAMESPACE

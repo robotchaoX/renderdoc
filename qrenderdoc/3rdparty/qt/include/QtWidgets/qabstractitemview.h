@@ -1,41 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the QtWidgets module of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:LGPL$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 3 as published by the Free Software
-** Foundation and appearing in the file LICENSE.LGPL3 included in the
-** packaging of this file. Please review the following information to
-** ensure the GNU Lesser General Public License version 3 requirements
-** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 2.0 or (at your option) the GNU General
-** Public license version 3 or any later version approved by the KDE Free
-** Qt Foundation. The licenses are as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-2.0.html and
-** https://www.gnu.org/licenses/gpl-3.0.html.
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #ifndef QABSTRACTITEMVIEW_H
 #define QABSTRACTITEMVIEW_H
@@ -65,7 +29,7 @@ class Q_WIDGETS_EXPORT QAbstractItemView : public QAbstractScrollArea
     Q_PROPERTY(int autoScrollMargin READ autoScrollMargin WRITE setAutoScrollMargin)
     Q_PROPERTY(EditTriggers editTriggers READ editTriggers WRITE setEditTriggers)
     Q_PROPERTY(bool tabKeyNavigation READ tabKeyNavigation WRITE setTabKeyNavigation)
-#ifndef QT_NO_DRAGANDDROP
+#if QT_CONFIG(draganddrop)
     Q_PROPERTY(bool showDropIndicator READ showDropIndicator WRITE setDropIndicatorShown)
     Q_PROPERTY(bool dragEnabled READ dragEnabled WRITE setDragEnabled)
     Q_PROPERTY(bool dragDropOverwriteMode READ dragDropOverwriteMode WRITE setDragDropOverwriteMode)
@@ -74,11 +38,14 @@ class Q_WIDGETS_EXPORT QAbstractItemView : public QAbstractScrollArea
 #endif
     Q_PROPERTY(bool alternatingRowColors READ alternatingRowColors WRITE setAlternatingRowColors)
     Q_PROPERTY(SelectionMode selectionMode READ selectionMode WRITE setSelectionMode)
-    Q_PROPERTY(SelectionBehavior selectionBehavior READ selectionBehavior WRITE setSelectionBehavior)
+    Q_PROPERTY(SelectionBehavior selectionBehavior READ selectionBehavior
+               WRITE setSelectionBehavior)
     Q_PROPERTY(QSize iconSize READ iconSize WRITE setIconSize NOTIFY iconSizeChanged)
     Q_PROPERTY(Qt::TextElideMode textElideMode READ textElideMode WRITE setTextElideMode)
-    Q_PROPERTY(ScrollMode verticalScrollMode READ verticalScrollMode WRITE setVerticalScrollMode RESET resetVerticalScrollMode)
-    Q_PROPERTY(ScrollMode horizontalScrollMode READ horizontalScrollMode WRITE setHorizontalScrollMode RESET resetHorizontalScrollMode)
+    Q_PROPERTY(ScrollMode verticalScrollMode READ verticalScrollMode WRITE setVerticalScrollMode
+               RESET resetVerticalScrollMode)
+    Q_PROPERTY(ScrollMode horizontalScrollMode READ horizontalScrollMode
+               WRITE setHorizontalScrollMode RESET resetHorizontalScrollMode)
 
 public:
     enum SelectionMode {
@@ -124,7 +91,7 @@ public:
     };
     Q_ENUM(ScrollMode)
 
-    explicit QAbstractItemView(QWidget *parent = Q_NULLPTR);
+    explicit QAbstractItemView(QWidget *parent = nullptr);
     ~QAbstractItemView();
 
     virtual void setModel(QAbstractItemModel *model);
@@ -165,7 +132,7 @@ public:
     void setTabKeyNavigation(bool enable);
     bool tabKeyNavigation() const;
 
-#ifndef QT_NO_DRAGANDDROP
+#if QT_CONFIG(draganddrop)
     void setDropIndicatorShown(bool enable);
     bool showDropIndicator() const;
 
@@ -212,6 +179,7 @@ public:
 
     void openPersistentEditor(const QModelIndex &index);
     void closePersistentEditor(const QModelIndex &index);
+    bool isPersistentEditorOpen(const QModelIndex &index) const;
 
     void setIndexWidget(const QModelIndex &index, QWidget *widget);
     QWidget *indexWidget(const QModelIndex &index) const;
@@ -222,9 +190,14 @@ public:
     void setItemDelegateForColumn(int column, QAbstractItemDelegate *delegate);
     QAbstractItemDelegate *itemDelegateForColumn(int column) const;
 
-    QAbstractItemDelegate *itemDelegate(const QModelIndex &index) const;
+#if QT_DEPRECATED_SINCE(6, 0)
+    QT_DEPRECATED_VERSION_X_6_0("Use itemDelegateForIndex instead")
+    QAbstractItemDelegate *itemDelegate(const QModelIndex &index) const
+    { return itemDelegateForIndex(index); }
+#endif
+    virtual QAbstractItemDelegate *itemDelegateForIndex(const QModelIndex &index) const;
 
-    virtual QVariant inputMethodQuery(Qt::InputMethodQuery query) const Q_DECL_OVERRIDE;
+    virtual QVariant inputMethodQuery(Qt::InputMethodQuery query) const override;
 
     using QAbstractScrollArea::update;
 
@@ -241,7 +214,8 @@ public Q_SLOTS:
     void update(const QModelIndex &index);
 
 protected Q_SLOTS:
-    virtual void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles = QVector<int>());
+    virtual void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
+                             const QList<int> &roles = QList<int>());
     virtual void rowsInserted(const QModelIndex &parent, int start, int end);
     virtual void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end);
     virtual void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
@@ -269,12 +243,7 @@ Q_SIGNALS:
     void iconSizeChanged(const QSize &size);
 
 protected:
-    QAbstractItemView(QAbstractItemViewPrivate &, QWidget *parent = Q_NULLPTR);
-
-    void setHorizontalStepsPerItem(int steps);
-    int horizontalStepsPerItem() const;
-    void setVerticalStepsPerItem(int steps);
-    int verticalStepsPerItem() const;
+    QAbstractItemView(QAbstractItemViewPrivate &, QWidget *parent = nullptr);
 
     enum CursorAction { MoveUp, MoveDown, MoveLeft, MoveRight,
                         MoveHome, MoveEnd, MovePageUp, MovePageDown,
@@ -294,13 +263,13 @@ protected:
     virtual bool edit(const QModelIndex &index, EditTrigger trigger, QEvent *event);
 
     virtual QItemSelectionModel::SelectionFlags selectionCommand(const QModelIndex &index,
-                                                                 const QEvent *event = Q_NULLPTR) const;
+                                                                 const QEvent *event = nullptr) const;
 
-#ifndef QT_NO_DRAGANDDROP
+#if QT_CONFIG(draganddrop)
     virtual void startDrag(Qt::DropActions supportedActions);
 #endif
 
-    virtual QStyleOptionViewItem viewOptions() const;
+    virtual void initViewItemOption(QStyleOptionViewItem *option) const;
 
     enum State {
         NoState,
@@ -326,49 +295,37 @@ protected:
     void stopAutoScroll();
     void doAutoScroll();
 
-    bool focusNextPrevChild(bool next) Q_DECL_OVERRIDE;
-    bool event(QEvent *event) Q_DECL_OVERRIDE;
-    bool viewportEvent(QEvent *event) Q_DECL_OVERRIDE;
-    void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
-    void mouseMoveEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
-    void mouseReleaseEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
-    void mouseDoubleClickEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
-#ifndef QT_NO_DRAGANDDROP
-    void dragEnterEvent(QDragEnterEvent *event) Q_DECL_OVERRIDE;
-    void dragMoveEvent(QDragMoveEvent *event) Q_DECL_OVERRIDE;
-    void dragLeaveEvent(QDragLeaveEvent *event) Q_DECL_OVERRIDE;
-    void dropEvent(QDropEvent *event) Q_DECL_OVERRIDE;
+    bool focusNextPrevChild(bool next) override;
+    bool event(QEvent *event) override;
+    bool viewportEvent(QEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void mouseDoubleClickEvent(QMouseEvent *event) override;
+#if QT_CONFIG(draganddrop)
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dragMoveEvent(QDragMoveEvent *event) override;
+    void dragLeaveEvent(QDragLeaveEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
 #endif
-    void focusInEvent(QFocusEvent *event) Q_DECL_OVERRIDE;
-    void focusOutEvent(QFocusEvent *event) Q_DECL_OVERRIDE;
-    void keyPressEvent(QKeyEvent *event) Q_DECL_OVERRIDE;
-    void resizeEvent(QResizeEvent *event) Q_DECL_OVERRIDE;
-    void timerEvent(QTimerEvent *event) Q_DECL_OVERRIDE;
-    void inputMethodEvent(QInputMethodEvent *event) Q_DECL_OVERRIDE;
+    void focusInEvent(QFocusEvent *event) override;
+    void focusOutEvent(QFocusEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
+    void timerEvent(QTimerEvent *event) override;
+    void inputMethodEvent(QInputMethodEvent *event) override;
+    bool eventFilter(QObject *object, QEvent *event) override;
 
-#ifndef QT_NO_DRAGANDDROP
+#if QT_CONFIG(draganddrop)
     enum DropIndicatorPosition { OnItem, AboveItem, BelowItem, OnViewport };
     DropIndicatorPosition dropIndicatorPosition() const;
 #endif
 
-    QSize viewportSizeHint() const Q_DECL_OVERRIDE;
+    QSize viewportSizeHint() const override;
 
 private:
     Q_DECLARE_PRIVATE(QAbstractItemView)
     Q_DISABLE_COPY(QAbstractItemView)
-    Q_PRIVATE_SLOT(d_func(), void _q_columnsAboutToBeRemoved(const QModelIndex&, int, int))
-    Q_PRIVATE_SLOT(d_func(), void _q_columnsRemoved(const QModelIndex&, int, int))
-    Q_PRIVATE_SLOT(d_func(), void _q_columnsInserted(const QModelIndex&, int, int))
-    Q_PRIVATE_SLOT(d_func(), void _q_rowsInserted(const QModelIndex&, int, int))
-    Q_PRIVATE_SLOT(d_func(), void _q_rowsRemoved(const QModelIndex&, int, int))
-    Q_PRIVATE_SLOT(d_func(), void _q_columnsMoved(const QModelIndex&, int, int, const QModelIndex&, int))
-    Q_PRIVATE_SLOT(d_func(), void _q_rowsMoved(const QModelIndex&, int, int, const QModelIndex&, int))
-    Q_PRIVATE_SLOT(d_func(), void _q_modelDestroyed())
-    Q_PRIVATE_SLOT(d_func(), void _q_layoutChanged())
-    Q_PRIVATE_SLOT(d_func(), void _q_headerDataChanged())
-#if QT_CONFIG(gestures) && QT_CONFIG(scroller)
-    Q_PRIVATE_SLOT(d_func(), void _q_scrollerStateChanged())
-#endif
 
     friend class ::tst_QAbstractItemView;
     friend class ::tst_QTreeView;

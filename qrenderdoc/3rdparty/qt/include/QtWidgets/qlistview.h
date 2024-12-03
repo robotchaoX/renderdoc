@@ -1,41 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the QtWidgets module of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:LGPL$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 3 as published by the Free Software
-** Foundation and appearing in the file LICENSE.LGPL3 included in the
-** packaging of this file. Please review the following information to
-** ensure the GNU Lesser General Public License version 3 requirements
-** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 2.0 or (at your option) the GNU General
-** Public license version 3 or any later version approved by the KDE Free
-** Qt Foundation. The licenses are as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-2.0.html and
-** https://www.gnu.org/licenses/gpl-3.0.html.
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #ifndef QLISTVIEW_H
 #define QLISTVIEW_H
@@ -65,6 +29,7 @@ class Q_WIDGETS_EXPORT QListView : public QAbstractItemView
     Q_PROPERTY(int batchSize READ batchSize WRITE setBatchSize)
     Q_PROPERTY(bool wordWrap READ wordWrap WRITE setWordWrap)
     Q_PROPERTY(bool selectionRectVisible READ isSelectionRectVisible WRITE setSelectionRectVisible)
+    Q_PROPERTY(Qt::Alignment itemAlignment READ itemAlignment WRITE setItemAlignment)
 
 public:
     enum Movement { Static, Free, Snap };
@@ -78,7 +43,7 @@ public:
     enum ViewMode { ListMode, IconMode };
     Q_ENUM(ViewMode)
 
-    explicit QListView(QWidget *parent = Q_NULLPTR);
+    explicit QListView(QWidget *parent = nullptr);
     ~QListView();
 
     void setMovement(Movement movement);
@@ -125,70 +90,75 @@ public:
     void setSelectionRectVisible(bool show);
     bool isSelectionRectVisible() const;
 
-    QRect visualRect(const QModelIndex &index) const Q_DECL_OVERRIDE;
-    void scrollTo(const QModelIndex &index, ScrollHint hint = EnsureVisible) Q_DECL_OVERRIDE;
-    QModelIndex indexAt(const QPoint &p) const Q_DECL_OVERRIDE;
+    void setItemAlignment(Qt::Alignment alignment);
+    Qt::Alignment itemAlignment() const;
 
-    void doItemsLayout() Q_DECL_OVERRIDE;
-    void reset() Q_DECL_OVERRIDE;
-    void setRootIndex(const QModelIndex &index) Q_DECL_OVERRIDE;
+    QRect visualRect(const QModelIndex &index) const override;
+    void scrollTo(const QModelIndex &index, ScrollHint hint = EnsureVisible) override;
+    QModelIndex indexAt(const QPoint &p) const override;
+
+    void doItemsLayout() override;
+    void reset() override;
+    void setRootIndex(const QModelIndex &index) override;
 
 Q_SIGNALS:
     void indexesMoved(const QModelIndexList &indexes);
 
 protected:
-    QListView(QListViewPrivate &, QWidget *parent = Q_NULLPTR);
+    QListView(QListViewPrivate &, QWidget *parent = nullptr);
 
-    bool event(QEvent *e) Q_DECL_OVERRIDE;
+    bool event(QEvent *e) override;
 
-    void scrollContentsBy(int dx, int dy) Q_DECL_OVERRIDE;
+    void scrollContentsBy(int dx, int dy) override;
 
     void resizeContents(int width, int height);
     QSize contentsSize() const;
 
-    void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles = QVector<int>()) Q_DECL_OVERRIDE;
-    void rowsInserted(const QModelIndex &parent, int start, int end) Q_DECL_OVERRIDE;
-    void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end) Q_DECL_OVERRIDE;
+    void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
+                     const QList<int> &roles = QList<int>()) override;
+    void rowsInserted(const QModelIndex &parent, int start, int end) override;
+    void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end) override;
 
-    void mouseMoveEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
-    void mouseReleaseEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
+    void mouseMoveEvent(QMouseEvent *e) override;
+    void mouseReleaseEvent(QMouseEvent *e) override;
 #if QT_CONFIG(wheelevent)
-    void wheelEvent(QWheelEvent *e) Q_DECL_OVERRIDE;
+    void wheelEvent(QWheelEvent *e) override;
 #endif
 
-    void timerEvent(QTimerEvent *e) Q_DECL_OVERRIDE;
-    void resizeEvent(QResizeEvent *e) Q_DECL_OVERRIDE;
-#ifndef QT_NO_DRAGANDDROP
-    void dragMoveEvent(QDragMoveEvent *e) Q_DECL_OVERRIDE;
-    void dragLeaveEvent(QDragLeaveEvent *e) Q_DECL_OVERRIDE;
-    void dropEvent(QDropEvent *e) Q_DECL_OVERRIDE;
-    void startDrag(Qt::DropActions supportedActions) Q_DECL_OVERRIDE;
-#endif // QT_NO_DRAGANDDROP
+    void timerEvent(QTimerEvent *e) override;
+    void resizeEvent(QResizeEvent *e) override;
+#if QT_CONFIG(draganddrop)
+    void dragMoveEvent(QDragMoveEvent *e) override;
+    void dragLeaveEvent(QDragLeaveEvent *e) override;
+    void dropEvent(QDropEvent *e) override;
+    void startDrag(Qt::DropActions supportedActions) override;
+#endif // QT_CONFIG(draganddrop)
 
-    QStyleOptionViewItem viewOptions() const Q_DECL_OVERRIDE;
-    void paintEvent(QPaintEvent *e) Q_DECL_OVERRIDE;
+    void initViewItemOption(QStyleOptionViewItem *option) const override;
+    void paintEvent(QPaintEvent *e) override;
 
-    int horizontalOffset() const Q_DECL_OVERRIDE;
-    int verticalOffset() const Q_DECL_OVERRIDE;
-    QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers) Q_DECL_OVERRIDE;
+    int horizontalOffset() const override;
+    int verticalOffset() const override;
+    QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers) override;
     QRect rectForIndex(const QModelIndex &index) const;
     void setPositionForIndex(const QPoint &position, const QModelIndex &index);
 
-    void setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags command) Q_DECL_OVERRIDE;
-    QRegion visualRegionForSelection(const QItemSelection &selection) const Q_DECL_OVERRIDE;
-    QModelIndexList selectedIndexes() const Q_DECL_OVERRIDE;
+    void setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags command) override;
+    QRegion visualRegionForSelection(const QItemSelection &selection) const override;
+    QModelIndexList selectedIndexes() const override;
 
-    void updateGeometries() Q_DECL_OVERRIDE;
+    void updateGeometries() override;
 
-    bool isIndexHidden(const QModelIndex &index) const Q_DECL_OVERRIDE;
+    bool isIndexHidden(const QModelIndex &index) const override;
 
-    void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected) Q_DECL_OVERRIDE;
-    void currentChanged(const QModelIndex &current, const QModelIndex &previous) Q_DECL_OVERRIDE;
+    void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected) override;
+    void currentChanged(const QModelIndex &current, const QModelIndex &previous) override;
 
-    QSize viewportSizeHint() const Q_DECL_OVERRIDE;
+    QSize viewportSizeHint() const override;
 
 private:
     int visualIndex(const QModelIndex &index) const;
+    friend class QCommonListViewBase;
 
     Q_DECLARE_PRIVATE(QListView)
     Q_DISABLE_COPY(QListView)

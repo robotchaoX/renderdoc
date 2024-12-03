@@ -1,41 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the QtWidgets module of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:LGPL$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 3 as published by the Free Software
-** Foundation and appearing in the file LICENSE.LGPL3 included in the
-** packaging of this file. Please review the following information to
-** ensure the GNU Lesser General Public License version 3 requirements
-** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 2.0 or (at your option) the GNU General
-** Public license version 3 or any later version approved by the KDE Free
-** Qt Foundation. The licenses are as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-2.0.html and
-** https://www.gnu.org/licenses/gpl-3.0.html.
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #ifndef QTABLEVIEW_H
 #define QTABLEVIEW_H
@@ -62,13 +26,13 @@ class Q_WIDGETS_EXPORT QTableView : public QAbstractItemView
 #endif
 
 public:
-    explicit QTableView(QWidget *parent = Q_NULLPTR);
+    explicit QTableView(QWidget *parent = nullptr);
     ~QTableView();
 
-    void setModel(QAbstractItemModel *model) Q_DECL_OVERRIDE;
-    void setRootIndex(const QModelIndex &index) Q_DECL_OVERRIDE;
-    void setSelectionModel(QItemSelectionModel *selectionModel) Q_DECL_OVERRIDE;
-    void doItemsLayout() Q_DECL_OVERRIDE;
+    void setModel(QAbstractItemModel *model) override;
+    void setRootIndex(const QModelIndex &index) override;
+    void setSelectionModel(QItemSelectionModel *selectionModel) override;
+    void doItemsLayout() override;
 
     QHeaderView *horizontalHeader() const;
     QHeaderView *verticalHeader() const;
@@ -109,16 +73,15 @@ public:
     bool isCornerButtonEnabled() const;
 #endif
 
-    QRect visualRect(const QModelIndex &index) const Q_DECL_OVERRIDE;
-    void scrollTo(const QModelIndex &index, ScrollHint hint = EnsureVisible) Q_DECL_OVERRIDE;
-    QModelIndex indexAt(const QPoint &p) const Q_DECL_OVERRIDE;
+    QRect visualRect(const QModelIndex &index) const override;
+    void scrollTo(const QModelIndex &index, ScrollHint hint = EnsureVisible) override;
+    QModelIndex indexAt(const QPoint &p) const override;
 
     void setSpan(int row, int column, int rowSpan, int columnSpan);
     int rowSpan(int row, int column) const;
     int columnSpan(int row, int column) const;
     void clearSpans();
 
-    void sortByColumn(int column, Qt::SortOrder order);
 
 public Q_SLOTS:
     void selectRow(int row);
@@ -131,7 +94,7 @@ public Q_SLOTS:
     void resizeRowsToContents();
     void resizeColumnToContents(int column);
     void resizeColumnsToContents();
-    void sortByColumn(int column);
+    void sortByColumn(int column, Qt::SortOrder order);
     void setShowGrid(bool show);
 
 protected Q_SLOTS:
@@ -144,37 +107,41 @@ protected Q_SLOTS:
 
 protected:
     QTableView(QTableViewPrivate &, QWidget *parent);
-    void scrollContentsBy(int dx, int dy) Q_DECL_OVERRIDE;
+    void scrollContentsBy(int dx, int dy) override;
 
-    QStyleOptionViewItem viewOptions() const Q_DECL_OVERRIDE;
-    void paintEvent(QPaintEvent *e) Q_DECL_OVERRIDE;
+    void initViewItemOption(QStyleOptionViewItem *option) const override;
+    void paintEvent(QPaintEvent *e) override;
 
-    void timerEvent(QTimerEvent *event) Q_DECL_OVERRIDE;
+    void timerEvent(QTimerEvent *event) override;
 
-    int horizontalOffset() const Q_DECL_OVERRIDE;
-    int verticalOffset() const Q_DECL_OVERRIDE;
-    QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers) Q_DECL_OVERRIDE;
+#if QT_CONFIG(draganddrop)
+    void dropEvent(QDropEvent *event) override;
+#endif
 
-    void setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags command) Q_DECL_OVERRIDE;
-    QRegion visualRegionForSelection(const QItemSelection &selection) const Q_DECL_OVERRIDE;
-    QModelIndexList selectedIndexes() const Q_DECL_OVERRIDE;
+    int horizontalOffset() const override;
+    int verticalOffset() const override;
+    QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers) override;
 
-    void updateGeometries() Q_DECL_OVERRIDE;
+    void setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags command) override;
+    QRegion visualRegionForSelection(const QItemSelection &selection) const override;
+    QModelIndexList selectedIndexes() const override;
 
-    QSize viewportSizeHint() const Q_DECL_OVERRIDE;
+    void updateGeometries() override;
 
-    int sizeHintForRow(int row) const Q_DECL_OVERRIDE;
-    int sizeHintForColumn(int column) const Q_DECL_OVERRIDE;
+    QSize viewportSizeHint() const override;
 
-    void verticalScrollbarAction(int action) Q_DECL_OVERRIDE;
-    void horizontalScrollbarAction(int action) Q_DECL_OVERRIDE;
+    int sizeHintForRow(int row) const override;
+    int sizeHintForColumn(int column) const override;
 
-    bool isIndexHidden(const QModelIndex &index) const Q_DECL_OVERRIDE;
+    void verticalScrollbarAction(int action) override;
+    void horizontalScrollbarAction(int action) override;
+
+    bool isIndexHidden(const QModelIndex &index) const override;
 
     void selectionChanged(const QItemSelection &selected,
-                          const QItemSelection &deselected) Q_DECL_OVERRIDE;
+                          const QItemSelection &deselected) override;
     void currentChanged(const QModelIndex &current,
-                          const QModelIndex &previous) Q_DECL_OVERRIDE;
+                          const QModelIndex &previous) override;
 
 private:
     friend class QAccessibleItemView;
@@ -182,12 +149,6 @@ private:
 
     Q_DECLARE_PRIVATE(QTableView)
     Q_DISABLE_COPY(QTableView)
-    Q_PRIVATE_SLOT(d_func(), void _q_selectRow(int))
-    Q_PRIVATE_SLOT(d_func(), void _q_selectColumn(int))
-    Q_PRIVATE_SLOT(d_func(), void _q_updateSpanInsertedRows(QModelIndex,int,int))
-    Q_PRIVATE_SLOT(d_func(), void _q_updateSpanInsertedColumns(QModelIndex,int,int))
-    Q_PRIVATE_SLOT(d_func(), void _q_updateSpanRemovedRows(QModelIndex,int,int))
-    Q_PRIVATE_SLOT(d_func(), void _q_updateSpanRemovedColumns(QModelIndex,int,int))
 };
 
 QT_END_NAMESPACE

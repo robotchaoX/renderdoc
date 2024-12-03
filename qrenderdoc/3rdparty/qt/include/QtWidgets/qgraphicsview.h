@@ -1,41 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the QtWidgets module of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:LGPL$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 3 as published by the Free Software
-** Foundation and appearing in the file LICENSE.LGPL3 included in the
-** packaging of this file. Please review the following information to
-** ensure the GNU Lesser General Public License version 3 requirements
-** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 2.0 or (at your option) the GNU General
-** Public license version 3 or any later version approved by the KDE Free
-** Qt Foundation. The licenses are as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-2.0.html and
-** https://www.gnu.org/licenses/gpl-3.0.html.
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #ifndef QGRAPHICSVIEW_H
 #define QGRAPHICSVIEW_H
@@ -68,13 +32,17 @@ class Q_WIDGETS_EXPORT QGraphicsView : public QAbstractScrollArea
     Q_PROPERTY(QPainter::RenderHints renderHints READ renderHints WRITE setRenderHints)
     Q_PROPERTY(DragMode dragMode READ dragMode WRITE setDragMode)
     Q_PROPERTY(CacheMode cacheMode READ cacheMode WRITE setCacheMode)
-    Q_PROPERTY(ViewportAnchor transformationAnchor READ transformationAnchor WRITE setTransformationAnchor)
+    Q_PROPERTY(ViewportAnchor transformationAnchor READ transformationAnchor
+               WRITE setTransformationAnchor)
     Q_PROPERTY(ViewportAnchor resizeAnchor READ resizeAnchor WRITE setResizeAnchor)
-    Q_PROPERTY(ViewportUpdateMode viewportUpdateMode READ viewportUpdateMode WRITE setViewportUpdateMode)
+    Q_PROPERTY(ViewportUpdateMode viewportUpdateMode READ viewportUpdateMode
+               WRITE setViewportUpdateMode)
 #if QT_CONFIG(rubberband)
-    Q_PROPERTY(Qt::ItemSelectionMode rubberBandSelectionMode READ rubberBandSelectionMode WRITE setRubberBandSelectionMode)
+    Q_PROPERTY(Qt::ItemSelectionMode rubberBandSelectionMode READ rubberBandSelectionMode
+               WRITE setRubberBandSelectionMode)
 #endif
-    Q_PROPERTY(OptimizationFlags optimizationFlags READ optimizationFlags WRITE setOptimizationFlags)
+    Q_PROPERTY(OptimizationFlags optimizationFlags READ optimizationFlags
+               WRITE setOptimizationFlags)
 
 public:
     enum ViewportAnchor {
@@ -107,18 +75,17 @@ public:
     Q_ENUM(ViewportUpdateMode)
 
     enum OptimizationFlag {
-        DontClipPainter = 0x1, // obsolete
-        DontSavePainterState = 0x2,
-        DontAdjustForAntialiasing = 0x4,
-        IndirectPainting = 0x8
+        DontSavePainterState = 0x1,
+        DontAdjustForAntialiasing = 0x2,
+        IndirectPainting = 0x4
     };
     Q_DECLARE_FLAGS(OptimizationFlags, OptimizationFlag)
 
-    QGraphicsView(QWidget *parent = Q_NULLPTR);
-    QGraphicsView(QGraphicsScene *scene, QWidget *parent = Q_NULLPTR);
+    QGraphicsView(QWidget *parent = nullptr);
+    QGraphicsView(QGraphicsScene *scene, QWidget *parent = nullptr);
     ~QGraphicsView();
 
-    QSize sizeHint() const Q_DECL_OVERRIDE;
+    QSize sizeHint() const override;
 
     QPainter::RenderHints renderHints() const;
     void setRenderHint(QPainter::RenderHint hint, bool enabled = true);
@@ -163,9 +130,6 @@ public:
     void setSceneRect(const QRectF &rect);
     inline void setSceneRect(qreal x, qreal y, qreal w, qreal h);
 
-    QMatrix matrix() const;
-    void setMatrix(const QMatrix &matrix, bool combine = false);
-    void resetMatrix();
     QTransform transform() const;
     QTransform viewportTransform() const;
     bool isTransformed() const;
@@ -214,7 +178,7 @@ public:
     inline QPoint mapFromScene(qreal x, qreal y) const;
     inline QPolygon mapFromScene(qreal x, qreal y, qreal w, qreal h) const;
 
-    QVariant inputMethodQuery(Qt::InputMethodQuery query) const Q_DECL_OVERRIDE;
+    QVariant inputMethodQuery(Qt::InputMethodQuery query) const override;
 
     QBrush backgroundBrush() const;
     void setBackgroundBrush(const QBrush &brush);
@@ -233,39 +197,39 @@ Q_SIGNALS:
 #endif
 
 protected Q_SLOTS:
-    void setupViewport(QWidget *widget) Q_DECL_OVERRIDE;
+    void setupViewport(QWidget *widget) override;
 
 protected:
-    QGraphicsView(QGraphicsViewPrivate &, QWidget *parent = Q_NULLPTR);
-    bool event(QEvent *event) Q_DECL_OVERRIDE;
-    bool viewportEvent(QEvent *event) Q_DECL_OVERRIDE;
+    QGraphicsView(QGraphicsViewPrivate &, QWidget *parent = nullptr);
+    bool event(QEvent *event) override;
+    bool viewportEvent(QEvent *event) override;
 
 #ifndef QT_NO_CONTEXTMENU
-    void contextMenuEvent(QContextMenuEvent *event) Q_DECL_OVERRIDE;
+    void contextMenuEvent(QContextMenuEvent *event) override;
 #endif
 #if QT_CONFIG(draganddrop)
-    void dragEnterEvent(QDragEnterEvent *event) Q_DECL_OVERRIDE;
-    void dragLeaveEvent(QDragLeaveEvent *event) Q_DECL_OVERRIDE;
-    void dragMoveEvent(QDragMoveEvent *event) Q_DECL_OVERRIDE;
-    void dropEvent(QDropEvent *event) Q_DECL_OVERRIDE;
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dragLeaveEvent(QDragLeaveEvent *event) override;
+    void dragMoveEvent(QDragMoveEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
 #endif
-    void focusInEvent(QFocusEvent *event) Q_DECL_OVERRIDE;
-    bool focusNextPrevChild(bool next) Q_DECL_OVERRIDE;
-    void focusOutEvent(QFocusEvent *event) Q_DECL_OVERRIDE;
-    void keyPressEvent(QKeyEvent *event) Q_DECL_OVERRIDE;
-    void keyReleaseEvent(QKeyEvent *event) Q_DECL_OVERRIDE;
-    void mouseDoubleClickEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
-    void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
-    void mouseMoveEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
-    void mouseReleaseEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
+    void focusInEvent(QFocusEvent *event) override;
+    bool focusNextPrevChild(bool next) override;
+    void focusOutEvent(QFocusEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
+    void keyReleaseEvent(QKeyEvent *event) override;
+    void mouseDoubleClickEvent(QMouseEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
 #if QT_CONFIG(wheelevent)
-    void wheelEvent(QWheelEvent *event) Q_DECL_OVERRIDE;
+    void wheelEvent(QWheelEvent *event) override;
 #endif
-    void paintEvent(QPaintEvent *event) Q_DECL_OVERRIDE;
-    void resizeEvent(QResizeEvent *event) Q_DECL_OVERRIDE;
-    void scrollContentsBy(int dx, int dy) Q_DECL_OVERRIDE;
-    void showEvent(QShowEvent *event) Q_DECL_OVERRIDE;
-    void inputMethodEvent(QInputMethodEvent *event) Q_DECL_OVERRIDE;
+    void paintEvent(QPaintEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
+    void scrollContentsBy(int dx, int dy) override;
+    void showEvent(QShowEvent *event) override;
+    void inputMethodEvent(QInputMethodEvent *event) override;
 
     virtual void drawBackground(QPainter *painter, const QRectF &rect);
     virtual void drawForeground(QPainter *painter, const QRectF &rect);

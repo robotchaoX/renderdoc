@@ -1,41 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the QtWidgets module of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:LGPL$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 3 as published by the Free Software
-** Foundation and appearing in the file LICENSE.LGPL3 included in the
-** packaging of this file. Please review the following information to
-** ensure the GNU Lesser General Public License version 3 requirements
-** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 2.0 or (at your option) the GNU General
-** Public license version 3 or any later version approved by the KDE Free
-** Qt Foundation. The licenses are as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-2.0.html and
-** https://www.gnu.org/licenses/gpl-3.0.html.
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #ifndef QGRAPHICSTRANSFORM_H
 #define QGRAPHICSTRANSFORM_H
@@ -57,7 +21,7 @@ class Q_WIDGETS_EXPORT QGraphicsTransform : public QObject
 {
     Q_OBJECT
 public:
-    QGraphicsTransform(QObject *parent = Q_NULLPTR);
+    QGraphicsTransform(QObject *parent = nullptr);
     ~QGraphicsTransform();
 
     virtual void applyTo(QMatrix4x4 *matrix) const = 0;
@@ -85,7 +49,7 @@ class Q_WIDGETS_EXPORT QGraphicsScale : public QGraphicsTransform
     Q_PROPERTY(qreal yScale READ yScale WRITE setYScale NOTIFY yScaleChanged)
     Q_PROPERTY(qreal zScale READ zScale WRITE setZScale NOTIFY zScaleChanged)
 public:
-    QGraphicsScale(QObject *parent = Q_NULLPTR);
+    QGraphicsScale(QObject *parent = nullptr);
     ~QGraphicsScale();
 
     QVector3D origin() const;
@@ -100,7 +64,7 @@ public:
     qreal zScale() const;
     void setZScale(qreal);
 
-    void applyTo(QMatrix4x4 *matrix) const Q_DECL_OVERRIDE;
+    void applyTo(QMatrix4x4 *matrix) const override;
 
 Q_SIGNALS:
     void originChanged();
@@ -123,7 +87,7 @@ class Q_WIDGETS_EXPORT QGraphicsRotation : public QGraphicsTransform
     Q_PROPERTY(qreal angle READ angle WRITE setAngle NOTIFY angleChanged)
     Q_PROPERTY(QVector3D axis READ axis WRITE setAxis NOTIFY axisChanged)
 public:
-    QGraphicsRotation(QObject *parent = Q_NULLPTR);
+    QGraphicsRotation(QObject *parent = nullptr);
     ~QGraphicsRotation();
 
     QVector3D origin() const;
@@ -136,7 +100,7 @@ public:
     void setAxis(const QVector3D &axis);
     void setAxis(Qt::Axis axis);
 
-    void applyTo(QMatrix4x4 *matrix) const Q_DECL_OVERRIDE;
+    void applyTo(QMatrix4x4 *matrix) const override;
 
 Q_SIGNALS:
     void originChanged();

@@ -1,41 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the QtGui module of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:LGPL$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 3 as published by the Free Software
-** Foundation and appearing in the file LICENSE.LGPL3 included in the
-** packaging of this file. Please review the following information to
-** ensure the GNU Lesser General Public License version 3 requirements
-** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 2.0 or (at your option) the GNU General
-** Public license version 3 or any later version approved by the KDE Free
-** Qt Foundation. The licenses are as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-2.0.html and
-** https://www.gnu.org/licenses/gpl-3.0.html.
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #ifndef QCURSOR_H
 #define QCURSOR_H
@@ -43,6 +7,7 @@
 #include <QtGui/qtguiglobal.h>
 #include <QtCore/qpoint.h>
 #include <QtGui/qwindowdefs.h>
+#include <QtGui/qbitmap.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -82,25 +47,29 @@ public:
     QCursor();
     QCursor(Qt::CursorShape shape);
     QCursor(const QBitmap &bitmap, const QBitmap &mask, int hotX=-1, int hotY=-1);
-    QCursor(const QPixmap &pixmap, int hotX=-1, int hotY=-1);
+    explicit QCursor(const QPixmap &pixmap, int hotX=-1, int hotY=-1);
     QCursor(const QCursor &cursor);
     ~QCursor();
     QCursor &operator=(const QCursor &cursor);
-#ifdef Q_COMPILER_RVALUE_REFS
-    QCursor(QCursor &&other) Q_DECL_NOTHROW : d(other.d) { other.d = Q_NULLPTR; }
-    inline QCursor &operator=(QCursor &&other) Q_DECL_NOTHROW
-    { swap(other); return *this; }
-#endif
+    QCursor(QCursor &&other) noexcept : d(std::exchange(other.d, nullptr)) {}
+    QT_MOVE_ASSIGNMENT_OPERATOR_IMPL_VIA_MOVE_AND_SWAP(QCursor)
 
-    void swap(QCursor &other) Q_DECL_NOTHROW { qSwap(d, other.d); }
+    void swap(QCursor &other) noexcept { qt_ptr_swap(d, other.d); }
 
     operator QVariant() const;
 
     Qt::CursorShape shape() const;
     void setShape(Qt::CursorShape newShape);
 
-    const QBitmap *bitmap() const;
-    const QBitmap *mask() const;
+#if QT_DEPRECATED_SINCE(6, 0)
+    QT_DEPRECATED_VERSION_X_6_0("Use the overload without argument instead.")
+    QBitmap bitmap(Qt::ReturnByValueConstant) const { return bitmap(); }
+    QT_DEPRECATED_VERSION_X_6_0("Use the overload without argument instead.")
+    QBitmap mask(Qt::ReturnByValueConstant) const { return mask(); }
+#endif // QT_DEPRECATED_SINCE(6, 0)
+    QBitmap bitmap() const;
+    QBitmap mask() const;
+
     QPixmap pixmap() const;
     QPoint hotSpot() const;
 
@@ -112,9 +81,11 @@ public:
     inline static void setPos(QScreen *screen, const QPoint &p) { setPos(screen, p.x(), p.y()); }
 
 private:
+    friend Q_GUI_EXPORT bool operator==(const QCursor &lhs, const QCursor &rhs) noexcept;
+    friend inline bool operator!=(const QCursor &lhs, const QCursor &rhs) noexcept { return !(lhs == rhs); }
     QCursorData *d;
 };
-Q_DECLARE_SHARED_NOT_MOVABLE_UNTIL_QT6(QCursor)
+Q_DECLARE_SHARED(QCursor)
 
 /*****************************************************************************
   QCursor stream functions

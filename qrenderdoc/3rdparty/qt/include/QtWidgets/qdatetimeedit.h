@@ -1,47 +1,12 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the QtWidgets module of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:LGPL$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 3 as published by the Free Software
-** Foundation and appearing in the file LICENSE.LGPL3 included in the
-** packaging of this file. Please review the following information to
-** ensure the GNU Lesser General Public License version 3 requirements
-** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 2.0 or (at your option) the GNU General
-** Public license version 3 or any later version approved by the KDE Free
-** Qt Foundation. The licenses are as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-2.0.html and
-** https://www.gnu.org/licenses/gpl-3.0.html.
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
+// Copyright (C) 2020 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #ifndef QDATETIMEEDIT_H
 #define QDATETIMEEDIT_H
 
 #include <QtWidgets/qtwidgetsglobal.h>
-#include <QtCore/qdatetime.h>
+#include <QtCore/qtimezone.h>
+#include <QtCore/qcalendar.h>
 #include <QtCore/qvariant.h>
 #include <QtWidgets/qabstractspinbox.h>
 
@@ -60,8 +25,10 @@ class Q_WIDGETS_EXPORT QDateTimeEdit : public QAbstractSpinBox
     Q_PROPERTY(QDateTime dateTime READ dateTime WRITE setDateTime NOTIFY dateTimeChanged USER true)
     Q_PROPERTY(QDate date READ date WRITE setDate NOTIFY dateChanged)
     Q_PROPERTY(QTime time READ time WRITE setTime NOTIFY timeChanged)
-    Q_PROPERTY(QDateTime maximumDateTime READ maximumDateTime WRITE setMaximumDateTime RESET clearMaximumDateTime)
-    Q_PROPERTY(QDateTime minimumDateTime READ minimumDateTime WRITE setMinimumDateTime RESET clearMinimumDateTime)
+    Q_PROPERTY(QDateTime maximumDateTime READ maximumDateTime WRITE setMaximumDateTime
+               RESET clearMaximumDateTime)
+    Q_PROPERTY(QDateTime minimumDateTime READ minimumDateTime WRITE setMinimumDateTime
+               RESET clearMinimumDateTime)
     Q_PROPERTY(QDate maximumDate READ maximumDate WRITE setMaximumDate RESET clearMaximumDate)
     Q_PROPERTY(QDate minimumDate READ minimumDate WRITE setMinimumDate RESET clearMinimumDate)
     Q_PROPERTY(QTime maximumTime READ maximumTime WRITE setMaximumTime RESET clearMaximumTime)
@@ -72,7 +39,10 @@ class Q_WIDGETS_EXPORT QDateTimeEdit : public QAbstractSpinBox
     Q_PROPERTY(bool calendarPopup READ calendarPopup WRITE setCalendarPopup)
     Q_PROPERTY(int currentSectionIndex READ currentSectionIndex WRITE setCurrentSectionIndex)
     Q_PROPERTY(int sectionCount READ sectionCount)
+#if QT_DEPRECATED_SINCE(6, 10)
     Q_PROPERTY(Qt::TimeSpec timeSpec READ timeSpec WRITE setTimeSpec)
+#endif
+    Q_PROPERTY(QTimeZone timeZone READ timeZone WRITE setTimeZone)
 public:
     enum Section { // a sub-type of QDateTimeParser's like-named enum.
         NoSection = 0x0000,
@@ -92,15 +62,18 @@ public:
     Q_DECLARE_FLAGS(Sections, Section)
     Q_FLAG(Sections)
 
-    explicit QDateTimeEdit(QWidget *parent = Q_NULLPTR);
-    explicit QDateTimeEdit(const QDateTime &dt, QWidget *parent = Q_NULLPTR);
-    explicit QDateTimeEdit(const QDate &d, QWidget *parent = Q_NULLPTR);
-    explicit QDateTimeEdit(const QTime &t, QWidget *parent = Q_NULLPTR);
+    explicit QDateTimeEdit(QWidget *parent = nullptr);
+    explicit QDateTimeEdit(const QDateTime &dt, QWidget *parent = nullptr);
+    explicit QDateTimeEdit(QDate d, QWidget *parent = nullptr);
+    explicit QDateTimeEdit(QTime t, QWidget *parent = nullptr);
     ~QDateTimeEdit();
 
     QDateTime dateTime() const;
     QDate date() const;
     QTime time() const;
+
+    QCalendar calendar() const;
+    void setCalendar(QCalendar calendar);
 
     QDateTime minimumDateTime() const;
     void clearMinimumDateTime();
@@ -113,24 +86,24 @@ public:
     void setDateTimeRange(const QDateTime &min, const QDateTime &max);
 
     QDate minimumDate() const;
-    void setMinimumDate(const QDate &min);
+    void setMinimumDate(QDate min);
     void clearMinimumDate();
 
     QDate maximumDate() const;
-    void setMaximumDate(const QDate &max);
+    void setMaximumDate(QDate max);
     void clearMaximumDate();
 
-    void setDateRange(const QDate &min, const QDate &max);
+    void setDateRange(QDate min, QDate max);
 
     QTime minimumTime() const;
-    void setMinimumTime(const QTime &min);
+    void setMinimumTime(QTime min);
     void clearMinimumTime();
 
     QTime maximumTime() const;
-    void setMaximumTime(const QTime &max);
+    void setMaximumTime(QTime max);
     void clearMaximumTime();
 
-    void setTimeRange(const QTime &min, const QTime &max);
+    void setTimeRange(QTime min, QTime max);
 
     Sections displayedSections() const;
     Section currentSection() const;
@@ -155,8 +128,14 @@ public:
     bool calendarPopup() const;
     void setCalendarPopup(bool enable);
 
+#if QT_DEPRECATED_SINCE(6, 10)
+    QT_DEPRECATED_VERSION_X_6_10("Use timeZone() instead")
     Qt::TimeSpec timeSpec() const;
+    QT_DEPRECATED_VERSION_X_6_10("Use setTimeZone() instead")
     void setTimeSpec(Qt::TimeSpec spec);
+#endif
+    QTimeZone timeZone() const;
+    void setTimeZone(const QTimeZone &zone);
 
     QSize sizeHint() const override;
 
@@ -166,13 +145,13 @@ public:
     bool event(QEvent *event) override;
 Q_SIGNALS:
     void dateTimeChanged(const QDateTime &dateTime);
-    void timeChanged(const QTime &time);
-    void dateChanged(const QDate &date);
+    void timeChanged(QTime time);
+    void dateChanged(QDate date);
 
 public Q_SLOTS:
     void setDateTime(const QDateTime &dateTime);
-    void setDate(const QDate &date);
-    void setTime(const QTime &time);
+    void setDate(QDate date);
+    void setTime(QTime time);
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
@@ -189,9 +168,9 @@ protected:
     StepEnabled stepEnabled() const override;
     void mousePressEvent(QMouseEvent *event) override;
     void paintEvent(QPaintEvent *event) override;
-    void initStyleOption(QStyleOptionSpinBox *option) const;
+    void initStyleOption(QStyleOptionSpinBox *option) const override;
 
-    QDateTimeEdit(const QVariant &val, QVariant::Type parserType, QWidget *parent = Q_NULLPTR);
+    QDateTimeEdit(const QVariant &val, QMetaType::Type parserType, QWidget *parent = nullptr);
 private:
     Q_DECLARE_PRIVATE(QDateTimeEdit)
     Q_DISABLE_COPY(QDateTimeEdit)
@@ -204,12 +183,12 @@ class Q_WIDGETS_EXPORT QTimeEdit : public QDateTimeEdit
     Q_OBJECT
     Q_PROPERTY(QTime time READ time WRITE setTime NOTIFY userTimeChanged USER true)
 public:
-    explicit QTimeEdit(QWidget *parent = Q_NULLPTR);
-    explicit QTimeEdit(const QTime &time, QWidget *parent = Q_NULLPTR);
+    explicit QTimeEdit(QWidget *parent = nullptr);
+    explicit QTimeEdit(QTime time, QWidget *parent = nullptr);
     ~QTimeEdit();
 
 Q_SIGNALS:
-    void userTimeChanged(const QTime &time);
+    void userTimeChanged(QTime time);
 };
 
 class Q_WIDGETS_EXPORT QDateEdit : public QDateTimeEdit
@@ -217,12 +196,12 @@ class Q_WIDGETS_EXPORT QDateEdit : public QDateTimeEdit
     Q_OBJECT
     Q_PROPERTY(QDate date READ date WRITE setDate NOTIFY userDateChanged USER true)
 public:
-    explicit QDateEdit(QWidget *parent = Q_NULLPTR);
-    explicit QDateEdit(const QDate &date, QWidget *parent = Q_NULLPTR);
+    explicit QDateEdit(QWidget *parent = nullptr);
+    explicit QDateEdit(QDate date, QWidget *parent = nullptr);
     ~QDateEdit();
 
 Q_SIGNALS:
-    void userDateChanged(const QDate &date);
+    void userDateChanged(QDate date);
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QDateTimeEdit::Sections)

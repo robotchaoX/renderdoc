@@ -1,41 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the QtGui module of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:LGPL$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 3 as published by the Free Software
-** Foundation and appearing in the file LICENSE.LGPL3 included in the
-** packaging of this file. Please review the following information to
-** ensure the GNU Lesser General Public License version 3 requirements
-** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 2.0 or (at your option) the GNU General
-** Public license version 3 or any later version approved by the KDE Free
-** Qt Foundation. The licenses are as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-2.0.html and
-** https://www.gnu.org/licenses/gpl-3.0.html.
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #ifndef QPAINTER_H
 #define QPAINTER_H
@@ -48,12 +12,12 @@
 #include <QtGui/qpixmap.h>
 #include <QtGui/qimage.h>
 #include <QtGui/qtextoption.h>
+#include <memory>
 
 #ifndef QT_INCLUDE_COMPAT
 #include <QtGui/qpolygon.h>
 #include <QtGui/qpen.h>
 #include <QtGui/qbrush.h>
-#include <QtGui/qmatrix.h>
 #include <QtGui/qtransform.h>
 #include <QtGui/qfontinfo.h>
 #include <QtGui/qfontmetrics.h>
@@ -72,7 +36,6 @@ class QPen;
 class QPolygon;
 class QTextItem;
 class QTextEngine;
-class QMatrix;
 class QTransform;
 class QStaticText;
 class QGlyphRun;
@@ -89,11 +52,11 @@ public:
         Antialiasing = 0x01,
         TextAntialiasing = 0x02,
         SmoothPixmapTransform = 0x04,
-        HighQualityAntialiasing = 0x08,
-        NonCosmeticDefaultPen = 0x10,
-        Qt4CompatiblePainting = 0x20
+        VerticalSubpixelPositioning = 0x08,
+        LosslessImageRendering = 0x40,
+        NonCosmeticBrushPatterns = 0x80
     };
-    Q_FLAG(RenderHint)
+    Q_ENUM(RenderHint)
 
     Q_DECLARE_FLAGS(RenderHints, RenderHint)
     Q_FLAG(RenderHints)
@@ -130,8 +93,6 @@ public:
     bool begin(QPaintDevice *);
     bool end();
     bool isActive() const;
-
-    void initFrom(const QPaintDevice *device);
 
     enum CompositionMode {
         CompositionMode_SourceOver,
@@ -231,27 +192,15 @@ public:
     void restore();
 
     // XForm functions
-    void setMatrix(const QMatrix &matrix, bool combine = false);
-    const QMatrix &matrix() const;
-    const QMatrix &deviceMatrix() const;
-    void resetMatrix();
-
     void setTransform(const QTransform &transform, bool combine = false);
     const QTransform &transform() const;
     const QTransform &deviceTransform() const;
     void resetTransform();
 
-    void setWorldMatrix(const QMatrix &matrix, bool combine = false);
-    const QMatrix &worldMatrix() const;
-
     void setWorldTransform(const QTransform &matrix, bool combine = false);
     const QTransform &worldTransform() const;
 
-    QMatrix combinedMatrix() const;
     QTransform combinedTransform() const;
-
-    void setMatrixEnabled(bool enabled);
-    bool matrixEnabled() const;
 
     void setWorldMatrixEnabled(bool enabled);
     bool worldMatrixEnabled() const;
@@ -296,22 +245,22 @@ public:
     inline void drawLine(const QPointF &p1, const QPointF &p2);
 
     void drawLines(const QLineF *lines, int lineCount);
-    inline void drawLines(const QVector<QLineF> &lines);
+    inline void drawLines(const QList<QLineF> &lines);
     void drawLines(const QPointF *pointPairs, int lineCount);
-    inline void drawLines(const QVector<QPointF> &pointPairs);
+    inline void drawLines(const QList<QPointF> &pointPairs);
     void drawLines(const QLine *lines, int lineCount);
-    inline void drawLines(const QVector<QLine> &lines);
+    inline void drawLines(const QList<QLine> &lines);
     void drawLines(const QPoint *pointPairs, int lineCount);
-    inline void drawLines(const QVector<QPoint> &pointPairs);
+    inline void drawLines(const QList<QPoint> &pointPairs);
 
     inline void drawRect(const QRectF &rect);
     inline void drawRect(int x1, int y1, int w, int h);
     inline void drawRect(const QRect &rect);
 
     void drawRects(const QRectF *rects, int rectCount);
-    inline void drawRects(const QVector<QRectF> &rectangles);
+    inline void drawRects(const QList<QRectF> &rectangles);
     void drawRects(const QRect *rects, int rectCount);
-    inline void drawRects(const QVector<QRect> &rectangles);
+    inline void drawRects(const QList<QRect> &rectangles);
 
     void drawEllipse(const QRectF &r);
     void drawEllipse(const QRect &r);
@@ -353,10 +302,6 @@ public:
                                 Qt::SizeMode mode = Qt::AbsoluteSize);
     inline void drawRoundedRect(const QRect &rect, qreal xRadius, qreal yRadius,
                                 Qt::SizeMode mode = Qt::AbsoluteSize);
-
-    void drawRoundRect(const QRectF &r, int xround = 25, int yround = 25);
-    inline void drawRoundRect(int x, int y, int w, int h, int = 25, int = 25);
-    inline void drawRoundRect(const QRect &r, int xround = 25, int yround = 25);
 
     void drawTiledPixmap(const QRectF &rect, const QPixmap &pm, const QPointF &offset = QPointF());
     inline void drawTiledPixmap(int x, int y, int w, int h, const QPixmap &, int sx=0, int sy=0);
@@ -416,9 +361,9 @@ public:
 
     void drawText(const QPointF &p, const QString &str, int tf, int justificationPadding);
 
-    void drawText(const QRectF &r, int flags, const QString &text, QRectF *br = Q_NULLPTR);
-    void drawText(const QRect &r, int flags, const QString &text, QRect *br = Q_NULLPTR);
-    inline void drawText(int x, int y, int w, int h, int flags, const QString &text, QRect *br = Q_NULLPTR);
+    void drawText(const QRectF &r, int flags, const QString &text, QRectF *br = nullptr);
+    void drawText(const QRect &r, int flags, const QString &text, QRect *br = nullptr);
+    inline void drawText(int x, int y, int w, int h, int flags, const QString &text, QRect *br = nullptr);
 
     void drawText(const QRectF &r, const QString &text, const QTextOption &o = QTextOption());
 
@@ -448,6 +393,10 @@ public:
     inline void fillRect(const QRect &r, Qt::BrushStyle style);
     inline void fillRect(const QRectF &r, Qt::BrushStyle style);
 
+    inline void fillRect(int x, int y, int w, int h, QGradient::Preset preset);
+    inline void fillRect(const QRect &r, QGradient::Preset preset);
+    inline void fillRect(const QRectF &r, QGradient::Preset preset);
+
     void eraseRect(const QRectF &);
     inline void eraseRect(int x, int y, int w, int h);
     inline void eraseRect(const QRect &);
@@ -455,14 +404,9 @@ public:
     void setRenderHint(RenderHint hint, bool on = true);
     void setRenderHints(RenderHints hints, bool on = true);
     RenderHints renderHints() const;
-    inline bool testRenderHint(RenderHint hint) const { return renderHints() & hint; }
+    inline bool testRenderHint(RenderHint hint) const { return bool(renderHints() & hint); }
 
     QPaintEngine *paintEngine() const;
-
-    static void setRedirected(const QPaintDevice *device, QPaintDevice *replacement,
-                              const QPoint& offset = QPoint());
-    static QPaintDevice *redirected(const QPaintDevice *device, QPoint *offset = Q_NULLPTR);
-    static void restoreRedirected(const QPaintDevice *device);
 
     void beginNativePainting();
     void endNativePainting();
@@ -470,7 +414,7 @@ public:
 private:
     Q_DISABLE_COPY(QPainter)
 
-    QScopedPointer<QPainterPrivate> d_ptr;
+    std::unique_ptr<QPainterPrivate> d_ptr;
 
     friend class QWidget;
     friend class QFontEngine;
@@ -522,54 +466,54 @@ inline void QPainter::drawLine(const QPointF &p1, const QPointF &p2)
     drawLine(QLineF(p1, p2));
 }
 
-inline void QPainter::drawLines(const QVector<QLineF> &lines)
+inline void QPainter::drawLines(const QList<QLineF> &lines)
 {
-    drawLines(lines.constData(), lines.size());
+    drawLines(lines.constData(), int(lines.size()));
 }
 
-inline void QPainter::drawLines(const QVector<QLine> &lines)
+inline void QPainter::drawLines(const QList<QLine> &lines)
 {
-    drawLines(lines.constData(), lines.size());
+    drawLines(lines.constData(), int(lines.size()));
 }
 
-inline void QPainter::drawLines(const QVector<QPointF> &pointPairs)
+inline void QPainter::drawLines(const QList<QPointF> &pointPairs)
 {
-    drawLines(pointPairs.constData(), pointPairs.size() / 2);
+    drawLines(pointPairs.constData(), int(pointPairs.size() / 2));
 }
 
-inline void QPainter::drawLines(const QVector<QPoint> &pointPairs)
+inline void QPainter::drawLines(const QList<QPoint> &pointPairs)
 {
-    drawLines(pointPairs.constData(), pointPairs.size() / 2);
+    drawLines(pointPairs.constData(), int(pointPairs.size() / 2));
 }
 
 inline void QPainter::drawPolyline(const QPolygonF &polyline)
 {
-    drawPolyline(polyline.constData(), polyline.size());
+    drawPolyline(polyline.constData(), int(polyline.size()));
 }
 
 inline void QPainter::drawPolyline(const QPolygon &polyline)
 {
-    drawPolyline(polyline.constData(), polyline.size());
+    drawPolyline(polyline.constData(), int(polyline.size()));
 }
 
 inline void QPainter::drawPolygon(const QPolygonF &polygon, Qt::FillRule fillRule)
 {
-    drawPolygon(polygon.constData(), polygon.size(), fillRule);
+    drawPolygon(polygon.constData(), int(polygon.size()), fillRule);
 }
 
 inline void QPainter::drawPolygon(const QPolygon &polygon, Qt::FillRule fillRule)
 {
-    drawPolygon(polygon.constData(), polygon.size(), fillRule);
+    drawPolygon(polygon.constData(), int(polygon.size()), fillRule);
 }
 
 inline void QPainter::drawConvexPolygon(const QPolygonF &poly)
 {
-    drawConvexPolygon(poly.constData(), poly.size());
+    drawConvexPolygon(poly.constData(), int(poly.size()));
 }
 
 inline void QPainter::drawConvexPolygon(const QPolygon &poly)
 {
-    drawConvexPolygon(poly.constData(), poly.size());
+    drawConvexPolygon(poly.constData(), int(poly.size()));
 }
 
 inline void QPainter::drawRect(const QRectF &rect)
@@ -588,14 +532,14 @@ inline void QPainter::drawRect(const QRect &r)
     drawRects(&r, 1);
 }
 
-inline void QPainter::drawRects(const QVector<QRectF> &rects)
+inline void QPainter::drawRects(const QList<QRectF> &rects)
 {
-    drawRects(rects.constData(), rects.size());
+    drawRects(rects.constData(), int(rects.size()));
 }
 
-inline void QPainter::drawRects(const QVector<QRect> &rects)
+inline void QPainter::drawRects(const QList<QRect> &rects)
 {
-    drawRects(rects.constData(), rects.size());
+    drawRects(rects.constData(), int(rects.size()));
 }
 
 inline void QPainter::drawPoint(const QPointF &p)
@@ -616,22 +560,12 @@ inline void QPainter::drawPoint(const QPoint &p)
 
 inline void QPainter::drawPoints(const QPolygonF &points)
 {
-    drawPoints(points.constData(), points.size());
+    drawPoints(points.constData(), int(points.size()));
 }
 
 inline void QPainter::drawPoints(const QPolygon &points)
 {
-    drawPoints(points.constData(), points.size());
-}
-
-inline void QPainter::drawRoundRect(int x, int y, int w, int h, int xRnd, int yRnd)
-{
-    drawRoundRect(QRectF(x, y, w, h), xRnd, yRnd);
-}
-
-inline void QPainter::drawRoundRect(const QRect &rect, int xRnd, int yRnd)
-{
-    drawRoundRect(QRectF(rect), xRnd, yRnd);
+    drawPoints(points.constData(), int(points.size()));
 }
 
 inline void QPainter::drawRoundedRect(int x, int y, int w, int h, qreal xRadius, qreal yRadius,
@@ -746,6 +680,20 @@ inline void QPainter::fillRect(const QRectF &r, Qt::BrushStyle style)
     fillRect(r, QBrush(style));
 }
 
+inline void QPainter::fillRect(int x, int y, int w, int h, QGradient::Preset p)
+{
+    fillRect(QRect(x, y, w, h), QGradient(p));
+}
+
+inline void QPainter::fillRect(const QRect &r, QGradient::Preset p)
+{
+    fillRect(r, QGradient(p));
+}
+
+inline void QPainter::fillRect(const QRectF &r, QGradient::Preset p)
+{
+    fillRect(r, QGradient(p));
+}
 
 inline void QPainter::setBrushOrigin(int x, int y)
 {

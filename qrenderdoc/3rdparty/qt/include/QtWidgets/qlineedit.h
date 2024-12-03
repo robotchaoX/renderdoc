@@ -1,41 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the QtWidgets module of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:LGPL$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 3 as published by the Free Software
-** Foundation and appearing in the file LICENSE.LGPL3 included in the
-** packaging of this file. Please review the following information to
-** ensure the GNU Lesser General Public License version 3 requirements
-** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 2.0 or (at your option) the GNU General
-** Public license version 3 or any later version approved by the KDE Free
-** Qt Foundation. The licenses are as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-2.0.html and
-** https://www.gnu.org/licenses/gpl-3.0.html.
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #ifndef QLINEEDIT_H
 #define QLINEEDIT_H
@@ -90,8 +54,8 @@ public:
     };
     Q_ENUM(ActionPosition)
 
-    explicit QLineEdit(QWidget *parent = Q_NULLPTR);
-    explicit QLineEdit(const QString &, QWidget *parent = Q_NULLPTR);
+    explicit QLineEdit(QWidget *parent = nullptr);
+    explicit QLineEdit(const QString &, QWidget *parent = nullptr);
     ~QLineEdit();
 
     QString text() const;
@@ -128,8 +92,8 @@ public:
     QCompleter *completer() const;
 #endif
 
-    QSize sizeHint() const Q_DECL_OVERRIDE;
-    QSize minimumSizeHint() const Q_DECL_OVERRIDE;
+    QSize sizeHint() const override;
+    QSize minimumSizeHint() const override;
 
     int cursorPosition() const;
     void setCursorPosition(int);
@@ -154,6 +118,8 @@ public:
     bool hasSelectedText() const;
     QString selectedText() const;
     int selectionStart() const;
+    int selectionEnd() const;
+    int selectionLength() const;
 
     bool isUndoAvailable() const;
     bool isRedoAvailable() const;
@@ -170,7 +136,6 @@ public:
 
     void setTextMargins(int left, int top, int right, int bottom);
     void setTextMargins(const QMargins &margins);
-    void getTextMargins(int *left, int *top, int *right, int *bottom) const;
     QMargins textMargins() const;
 
 #if QT_CONFIG(action)
@@ -205,33 +170,36 @@ Q_SIGNALS:
     void returnPressed();
     void editingFinished();
     void selectionChanged();
+    void inputRejected();
 
 protected:
-    void mousePressEvent(QMouseEvent *) Q_DECL_OVERRIDE;
-    void mouseMoveEvent(QMouseEvent *) Q_DECL_OVERRIDE;
-    void mouseReleaseEvent(QMouseEvent *) Q_DECL_OVERRIDE;
-    void mouseDoubleClickEvent(QMouseEvent *) Q_DECL_OVERRIDE;
-    void keyPressEvent(QKeyEvent *) Q_DECL_OVERRIDE;
-    void focusInEvent(QFocusEvent *) Q_DECL_OVERRIDE;
-    void focusOutEvent(QFocusEvent *) Q_DECL_OVERRIDE;
-    void paintEvent(QPaintEvent *) Q_DECL_OVERRIDE;
-#ifndef QT_NO_DRAGANDDROP
-    void dragEnterEvent(QDragEnterEvent *) Q_DECL_OVERRIDE;
-    void dragMoveEvent(QDragMoveEvent *e) Q_DECL_OVERRIDE;
-    void dragLeaveEvent(QDragLeaveEvent *e) Q_DECL_OVERRIDE;
-    void dropEvent(QDropEvent *) Q_DECL_OVERRIDE;
+    void mousePressEvent(QMouseEvent *) override;
+    void mouseMoveEvent(QMouseEvent *) override;
+    void mouseReleaseEvent(QMouseEvent *) override;
+    void mouseDoubleClickEvent(QMouseEvent *) override;
+    void keyPressEvent(QKeyEvent *) override;
+    void keyReleaseEvent(QKeyEvent *) override;
+    void focusInEvent(QFocusEvent *) override;
+    void focusOutEvent(QFocusEvent *) override;
+    void paintEvent(QPaintEvent *) override;
+#if QT_CONFIG(draganddrop)
+    void dragEnterEvent(QDragEnterEvent *) override;
+    void dragMoveEvent(QDragMoveEvent *e) override;
+    void dragLeaveEvent(QDragLeaveEvent *e) override;
+    void dropEvent(QDropEvent *) override;
 #endif
-    void changeEvent(QEvent *) Q_DECL_OVERRIDE;
+    void changeEvent(QEvent *) override;
 #ifndef QT_NO_CONTEXTMENU
-    void contextMenuEvent(QContextMenuEvent *) Q_DECL_OVERRIDE;
+    void contextMenuEvent(QContextMenuEvent *) override;
 #endif
 
-    void inputMethodEvent(QInputMethodEvent *) Q_DECL_OVERRIDE;
-    void initStyleOption(QStyleOptionFrame *option) const;
+    void inputMethodEvent(QInputMethodEvent *) override;
+    virtual void initStyleOption(QStyleOptionFrame *option) const;
 public:
-    QVariant inputMethodQuery(Qt::InputMethodQuery) const Q_DECL_OVERRIDE;
+    QVariant inputMethodQuery(Qt::InputMethodQuery) const override;
     Q_INVOKABLE QVariant inputMethodQuery(Qt::InputMethodQuery property, QVariant argument) const;
-    bool event(QEvent *) Q_DECL_OVERRIDE;
+    void timerEvent(QTimerEvent *) override;
+    bool event(QEvent *) override;
 protected:
     QRect cursorRect() const;
 
@@ -246,19 +214,6 @@ private:
 #endif
     Q_DISABLE_COPY(QLineEdit)
     Q_DECLARE_PRIVATE(QLineEdit)
-    Q_PRIVATE_SLOT(d_func(), void _q_handleWindowActivate())
-    Q_PRIVATE_SLOT(d_func(), void _q_textEdited(const QString &))
-    Q_PRIVATE_SLOT(d_func(), void _q_cursorPositionChanged(int, int))
-#if QT_CONFIG(completer)
-    Q_PRIVATE_SLOT(d_func(), void _q_completionHighlighted(const QString &))
-#endif
-#ifdef QT_KEYPAD_NAVIGATION
-    Q_PRIVATE_SLOT(d_func(), void _q_editFocusChange(bool))
-#endif
-    Q_PRIVATE_SLOT(d_func(), void _q_selectionChanged())
-    Q_PRIVATE_SLOT(d_func(), void _q_updateNeeded(const QRect &))
-    Q_PRIVATE_SLOT(d_func(), void _q_textChanged(const QString &))
-    Q_PRIVATE_SLOT(d_func(), void _q_clearButtonClicked())
 };
 
 QT_END_NAMESPACE

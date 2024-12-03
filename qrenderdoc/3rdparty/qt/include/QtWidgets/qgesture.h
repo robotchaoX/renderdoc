@@ -1,47 +1,12 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the QtWidgets module of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:LGPL$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 3 as published by the Free Software
-** Foundation and appearing in the file LICENSE.LGPL3 included in the
-** packaging of this file. Please review the following information to
-** ensure the GNU Lesser General Public License version 3 requirements
-** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 2.0 or (at your option) the GNU General
-** Public license version 3 or any later version approved by the KDE Free
-** Qt Foundation. The licenses are as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-2.0.html and
-** https://www.gnu.org/licenses/gpl-3.0.html.
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #ifndef QGESTURE_H
 #define QGESTURE_H
 
 #include <QtWidgets/qtwidgetsglobal.h>
 #include <QtCore/qobject.h>
+#include <QtCore/qmap.h>
 #include <QtCore/qlist.h>
 #include <QtCore/qdatetime.h>
 #include <QtCore/qpoint.h>
@@ -51,8 +16,10 @@
 
 #ifndef QT_NO_GESTURES
 
-Q_DECLARE_METATYPE(Qt::GestureState)
-Q_DECLARE_METATYPE(Qt::GestureType)
+// ### move to qnamespace.h
+QT_DECL_METATYPE_EXTERN_TAGGED(Qt::GestureState, Qt__GestureState, Q_WIDGETS_EXPORT)
+// ### move to qnamespace.h
+QT_DECL_METATYPE_EXTERN_TAGGED(Qt::GestureType, Qt__GestureType, Q_WIDGETS_EXPORT)
 
 QT_BEGIN_NAMESPACE
 
@@ -65,12 +32,13 @@ class Q_WIDGETS_EXPORT QGesture : public QObject
 
     Q_PROPERTY(Qt::GestureState state READ state)
     Q_PROPERTY(Qt::GestureType gestureType READ gestureType)
-    Q_PROPERTY(QGesture::GestureCancelPolicy gestureCancelPolicy READ gestureCancelPolicy WRITE setGestureCancelPolicy)
+    Q_PROPERTY(QGesture::GestureCancelPolicy gestureCancelPolicy READ gestureCancelPolicy
+               WRITE setGestureCancelPolicy)
     Q_PROPERTY(QPointF hotSpot READ hotSpot WRITE setHotSpot RESET unsetHotSpot)
     Q_PROPERTY(bool hasHotSpot READ hasHotSpot)
 
 public:
-    explicit QGesture(QObject *parent = Q_NULLPTR);
+    explicit QGesture(QObject *parent = nullptr);
     ~QGesture();
 
     Qt::GestureType gestureType() const;
@@ -114,7 +82,7 @@ class Q_WIDGETS_EXPORT QPanGesture : public QGesture
     Q_PRIVATE_PROPERTY(QPanGesture::d_func(), qreal verticalVelocity READ verticalVelocity WRITE setVerticalVelocity)
 
 public:
-    explicit QPanGesture(QObject *parent = Q_NULLPTR);
+    explicit QPanGesture(QObject *parent = nullptr);
     ~QPanGesture();
 
     QPointF lastOffset() const;
@@ -142,7 +110,7 @@ public:
         RotationAngleChanged = 0x2,
         CenterPointChanged = 0x4
     };
-    Q_FLAG(ChangeFlag)
+    Q_ENUM(ChangeFlag)
     Q_DECLARE_FLAGS(ChangeFlags, ChangeFlag)
     Q_FLAG(ChangeFlags)
 
@@ -162,7 +130,7 @@ public:
     Q_PROPERTY(QPointF centerPoint READ centerPoint WRITE setCenterPoint)
 
 public:
-    explicit QPinchGesture(QObject *parent = Q_NULLPTR);
+    explicit QPinchGesture(QObject *parent = nullptr);
     ~QPinchGesture();
 
     ChangeFlags totalChangeFlags() const;
@@ -199,7 +167,8 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(QPinchGesture::ChangeFlags)
 
 QT_END_NAMESPACE
 
-Q_DECLARE_METATYPE(QPinchGesture::ChangeFlags)
+QT_DECL_METATYPE_EXTERN_TAGGED(QPinchGesture::ChangeFlags,
+                               QPinchGesture__ChangeFlags, Q_WIDGETS_EXPORT)
 
 QT_BEGIN_NAMESPACE
 
@@ -218,7 +187,7 @@ public:
     enum SwipeDirection { NoDirection, Left, Right, Up, Down };
     Q_ENUM(SwipeDirection)
 
-    explicit QSwipeGesture(QObject *parent = Q_NULLPTR);
+    explicit QSwipeGesture(QObject *parent = nullptr);
     ~QSwipeGesture();
 
     SwipeDirection horizontalDirection() const;
@@ -239,7 +208,7 @@ class Q_WIDGETS_EXPORT QTapGesture : public QGesture
     Q_PROPERTY(QPointF position READ position WRITE setPosition)
 
 public:
-    explicit QTapGesture(QObject *parent = Q_NULLPTR);
+    explicit QTapGesture(QObject *parent = nullptr);
     ~QTapGesture();
 
     QPointF position() const;
@@ -257,7 +226,7 @@ class Q_WIDGETS_EXPORT QTapAndHoldGesture : public QGesture
     Q_PROPERTY(QPointF position READ position WRITE setPosition)
 
 public:
-    explicit QTapAndHoldGesture(QObject *parent = Q_NULLPTR);
+    explicit QTapAndHoldGesture(QObject *parent = nullptr);
     ~QTapAndHoldGesture();
 
     QPointF position() const;
@@ -322,7 +291,9 @@ Q_WIDGETS_EXPORT QDebug operator<<(QDebug, const QGestureEvent *);
 
 QT_END_NAMESPACE
 
-Q_DECLARE_METATYPE(QGesture::GestureCancelPolicy)
+QT_DECL_METATYPE_EXTERN_TAGGED(QGesture::GestureCancelPolicy,
+                               QGesture__GestureCancelPolicy, Q_WIDGETS_EXPORT)
+
 #endif // QT_NO_GESTURES
 
 #endif // QGESTURE_H

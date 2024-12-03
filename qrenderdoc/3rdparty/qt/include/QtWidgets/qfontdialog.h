@@ -1,41 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the QtWidgets module of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:LGPL$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 3 as published by the Free Software
-** Foundation and appearing in the file LICENSE.LGPL3 included in the
-** packaging of this file. Please review the following information to
-** ensure the GNU Lesser General Public License version 3 requirements
-** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 2.0 or (at your option) the GNU General
-** Public license version 3 or any later version approved by the KDE Free
-** Qt Foundation. The licenses are as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-2.0.html and
-** https://www.gnu.org/licenses/gpl-3.0.html.
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #ifndef QFONTDIALOG_H
 #define QFONTDIALOG_H
@@ -72,8 +36,8 @@ public:
 
     Q_DECLARE_FLAGS(FontDialogOptions, FontDialogOption)
 
-    explicit QFontDialog(QWidget *parent = Q_NULLPTR);
-    explicit QFontDialog(const QFont &initial, QWidget *parent = Q_NULLPTR);
+    explicit QFontDialog(QWidget *parent = nullptr);
+    explicit QFontDialog(const QFont &initial, QWidget *parent = nullptr);
     ~QFontDialog();
 
     void setCurrentFont(const QFont &font);
@@ -89,10 +53,10 @@ public:
     using QDialog::open;
     void open(QObject *receiver, const char *member);
 
-    void setVisible(bool visible) Q_DECL_OVERRIDE;
+    void setVisible(bool visible) override;
 
-    static QFont getFont(bool *ok, QWidget *parent = Q_NULLPTR);
-    static QFont getFont(bool *ok, const QFont &initial, QWidget *parent = Q_NULLPTR, const QString &title = QString(),
+    static QFont getFont(bool *ok, QWidget *parent = nullptr);
+    static QFont getFont(bool *ok, const QFont &initial, QWidget *parent = nullptr, const QString &title = QString(),
                          FontDialogOptions options = FontDialogOptions());
 
 Q_SIGNALS:
@@ -100,19 +64,12 @@ Q_SIGNALS:
     void fontSelected(const QFont &font);
 
 protected:
-    void changeEvent(QEvent *event) Q_DECL_OVERRIDE;
-    void done(int result) Q_DECL_OVERRIDE;
-    bool eventFilter(QObject *object, QEvent *event) Q_DECL_OVERRIDE;
+    void changeEvent(QEvent *event) override;
+    void done(int result) override;
+    bool eventFilter(QObject *object, QEvent *event) override;
 
 private:
     Q_DISABLE_COPY(QFontDialog)
-
-    Q_PRIVATE_SLOT(d_func(), void _q_sizeChanged(const QString &))
-    Q_PRIVATE_SLOT(d_func(), void _q_familyHighlighted(int))
-    Q_PRIVATE_SLOT(d_func(), void _q_writingSystemHighlighted(int))
-    Q_PRIVATE_SLOT(d_func(), void _q_styleHighlighted(int))
-    Q_PRIVATE_SLOT(d_func(), void _q_sizeHighlighted(int))
-    Q_PRIVATE_SLOT(d_func(), void _q_updateSample())
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QFontDialog::FontDialogOptions)

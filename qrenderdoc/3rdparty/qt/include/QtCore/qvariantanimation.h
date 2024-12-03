@@ -1,55 +1,18 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the QtCore module of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:LGPL$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 3 as published by the Free Software
-** Foundation and appearing in the file LICENSE.LGPL3 included in the
-** packaging of this file. Please review the following information to
-** ensure the GNU Lesser General Public License version 3 requirements
-** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 2.0 or (at your option) the GNU General
-** Public license version 3 or any later version approved by the KDE Free
-** Qt Foundation. The licenses are as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-2.0.html and
-** https://www.gnu.org/licenses/gpl-3.0.html.
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #ifndef QVARIANTANIMATION_H
 #define QVARIANTANIMATION_H
 
-#include <QtCore/qeasingcurve.h>
 #include <QtCore/qabstractanimation.h>
-#include <QtCore/qvector.h>
-#include <QtCore/qvariant.h>
+#include <QtCore/qeasingcurve.h>
+#include <QtCore/qlist.h>
 #include <QtCore/qpair.h>
+#include <QtCore/qvariant.h>
+
+QT_REQUIRE_CONFIG(animation);
 
 QT_BEGIN_NAMESPACE
-
-
-#ifndef QT_NO_ANIMATION
 
 class QVariantAnimationPrivate;
 class Q_CORE_EXPORT QVariantAnimation : public QAbstractAnimation
@@ -58,14 +21,15 @@ class Q_CORE_EXPORT QVariantAnimation : public QAbstractAnimation
     Q_PROPERTY(QVariant startValue READ startValue WRITE setStartValue)
     Q_PROPERTY(QVariant endValue READ endValue WRITE setEndValue)
     Q_PROPERTY(QVariant currentValue READ currentValue NOTIFY valueChanged)
-    Q_PROPERTY(int duration READ duration WRITE setDuration)
-    Q_PROPERTY(QEasingCurve easingCurve READ easingCurve WRITE setEasingCurve)
+    Q_PROPERTY(int duration READ duration WRITE setDuration BINDABLE bindableDuration)
+    Q_PROPERTY(QEasingCurve easingCurve READ easingCurve WRITE setEasingCurve
+               BINDABLE bindableEasingCurve)
 
 public:
-    typedef QPair<qreal, QVariant> KeyValue;
-    typedef QVector<KeyValue> KeyValues;
+    using KeyValue = std::pair<qreal, QVariant>;
+    typedef QList<KeyValue> KeyValues;
 
-    QVariantAnimation(QObject *parent = Q_NULLPTR);
+    QVariantAnimation(QObject *parent = nullptr);
     ~QVariantAnimation();
 
     QVariant startValue() const;
@@ -82,11 +46,13 @@ public:
 
     QVariant currentValue() const;
 
-    int duration() const Q_DECL_OVERRIDE;
+    int duration() const override;
     void setDuration(int msecs);
+    QBindable<int> bindableDuration();
 
     QEasingCurve easingCurve() const;
     void setEasingCurve(const QEasingCurve &easing);
+    QBindable<QEasingCurve> bindableEasingCurve();
 
     typedef QVariant (*Interpolator)(const void *from, const void *to, qreal progress);
 
@@ -94,11 +60,11 @@ Q_SIGNALS:
     void valueChanged(const QVariant &value);
 
 protected:
-    QVariantAnimation(QVariantAnimationPrivate &dd, QObject *parent = Q_NULLPTR);
-    bool event(QEvent *event) Q_DECL_OVERRIDE;
+    QVariantAnimation(QVariantAnimationPrivate &dd, QObject *parent = nullptr);
+    bool event(QEvent *event) override;
 
-    void updateCurrentTime(int) Q_DECL_OVERRIDE;
-    void updateState(QAbstractAnimation::State newState, QAbstractAnimation::State oldState) Q_DECL_OVERRIDE;
+    void updateCurrentTime(int) override;
+    void updateState(QAbstractAnimation::State newState, QAbstractAnimation::State oldState) override;
 
     virtual void updateCurrentValue(const QVariant &value);
     virtual QVariant interpolated(const QVariant &from, const QVariant &to, qreal progress) const;
@@ -113,10 +79,8 @@ private:
 
 template <typename T>
 void qRegisterAnimationInterpolator(QVariant (*func)(const T &from, const T &to, qreal progress)) {
-    QVariantAnimation::registerInterpolator(reinterpret_cast<QVariantAnimation::Interpolator>(func), qMetaTypeId<T>());
+    QVariantAnimation::registerInterpolator(reinterpret_cast<QVariantAnimation::Interpolator>(reinterpret_cast<void(*)()>(func)), qMetaTypeId<T>());
 }
-
-#endif //QT_NO_ANIMATION
 
 QT_END_NAMESPACE
 

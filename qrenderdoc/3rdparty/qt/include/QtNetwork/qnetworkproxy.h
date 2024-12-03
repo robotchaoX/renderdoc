@@ -1,41 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the QtNetwork module of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:LGPL$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 3 as published by the Free Software
-** Foundation and appearing in the file LICENSE.LGPL3 included in the
-** packaging of this file. Please review the following information to
-** ensure the GNU Lesser General Public License version 3 requirements
-** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 2.0 or (at your option) the GNU General
-** Public license version 3 or any later version approved by the KDE Free
-** Qt Foundation. The licenses are as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-2.0.html and
-** https://www.gnu.org/licenses/gpl-3.0.html.
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #ifndef QNETWORKPROXY_H
 #define QNETWORKPROXY_H
@@ -51,7 +15,6 @@ QT_BEGIN_NAMESPACE
 
 
 class QUrl;
-class QNetworkConfiguration;
 
 class QNetworkProxyQueryPrivate;
 class Q_NETWORK_EXPORT QNetworkProxyQuery
@@ -75,24 +38,12 @@ public:
                        QueryType queryType = TcpSocket);
     explicit QNetworkProxyQuery(quint16 bindPort, const QString &protocolTag = QString(),
                        QueryType queryType = TcpServer);
-#ifndef QT_NO_BEARERMANAGEMENT
-    QNetworkProxyQuery(const QNetworkConfiguration &networkConfiguration,
-                       const QUrl &requestUrl, QueryType queryType = UrlRequest);
-    QNetworkProxyQuery(const QNetworkConfiguration &networkConfiguration,
-                       const QString &hostname, int port, const QString &protocolTag = QString(),
-                       QueryType queryType = TcpSocket);
-    QNetworkProxyQuery(const QNetworkConfiguration &networkConfiguration,
-                       quint16 bindPort, const QString &protocolTag = QString(),
-                       QueryType queryType = TcpServer);
-#endif
     QNetworkProxyQuery(const QNetworkProxyQuery &other);
-#ifdef Q_COMPILER_RVALUE_REFS
-    QNetworkProxyQuery &operator=(QNetworkProxyQuery &&other) Q_DECL_NOTHROW { swap(other); return *this; }
-#endif
+    QNetworkProxyQuery &operator=(QNetworkProxyQuery &&other) noexcept { swap(other); return *this; }
     QNetworkProxyQuery &operator=(const QNetworkProxyQuery &other);
     ~QNetworkProxyQuery();
 
-    void swap(QNetworkProxyQuery &other) Q_DECL_NOTHROW { qSwap(d, other.d); }
+    void swap(QNetworkProxyQuery &other) noexcept { d.swap(other.d); }
 
     bool operator==(const QNetworkProxyQuery &other) const;
     inline bool operator!=(const QNetworkProxyQuery &other) const
@@ -116,11 +67,6 @@ public:
     QUrl url() const;
     void setUrl(const QUrl &url);
 
-#ifndef QT_NO_BEARERMANAGEMENT
-    QNetworkConfiguration networkConfiguration() const;
-    void setNetworkConfiguration(const QNetworkConfiguration &networkConfiguration);
-#endif
-
 private:
     QSharedDataPointer<QNetworkProxyQueryPrivate> d;
 };
@@ -131,6 +77,7 @@ class QNetworkProxyPrivate;
 
 class Q_NETWORK_EXPORT QNetworkProxy
 {
+    Q_GADGET
 public:
     enum ProxyType {
         DefaultProxy,
@@ -156,13 +103,11 @@ public:
     QNetworkProxy(ProxyType type, const QString &hostName = QString(), quint16 port = 0,
                   const QString &user = QString(), const QString &password = QString());
     QNetworkProxy(const QNetworkProxy &other);
-#ifdef Q_COMPILER_RVALUE_REFS
-    QNetworkProxy &operator=(QNetworkProxy &&other) Q_DECL_NOTHROW { swap(other); return *this; }
-#endif
+    QNetworkProxy &operator=(QNetworkProxy &&other) noexcept { swap(other); return *this; }
     QNetworkProxy &operator=(const QNetworkProxy &other);
     ~QNetworkProxy();
 
-    void swap(QNetworkProxy &other) Q_DECL_NOTHROW { qSwap(d, other.d); }
+    void swap(QNetworkProxy &other) noexcept { d.swap(other.d); }
 
     bool operator==(const QNetworkProxy &other) const;
     inline bool operator!=(const QNetworkProxy &other) const
@@ -190,6 +135,10 @@ public:
 
     static void setApplicationProxy(const QNetworkProxy &proxy);
     static QNetworkProxy applicationProxy();
+
+    QHttpHeaders headers() const;
+    void setHeaders(const QHttpHeaders &newHeaders);
+    void setHeaders(QHttpHeaders &&newHeaders);
 
     // "cooked" headers
     QVariant header(QNetworkRequest::KnownHeaders header) const;
@@ -230,7 +179,7 @@ Q_NETWORK_EXPORT QDebug operator<<(QDebug debug, const QNetworkProxyQuery &proxy
 
 QT_END_NAMESPACE
 
-Q_DECLARE_METATYPE(QNetworkProxy)
+QT_DECL_METATYPE_EXTERN(QNetworkProxy, Q_NETWORK_EXPORT)
 
 #endif // QT_NO_NETWORKPROXY
 

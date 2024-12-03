@@ -48,20 +48,14 @@ exists($$QMLTYPEFILE): AUX_QML_FILES += $$QMLTYPEFILE
 
 load(qt_build_paths)
 
-qml1_target {
-    DESTDIR = $$MODULE_BASE_OUTDIR/imports/$$TARGETPATH
-    instbase = $$[QT_INSTALL_IMPORTS]
-} else {
-    DESTDIR = $$MODULE_BASE_OUTDIR/qml/$$TARGETPATH
-    instbase = $$[QT_INSTALL_QML]
-}
+DESTDIR = $$MODULE_BASE_OUTDIR/qml/$$TARGETPATH
 
-target.path = $$instbase/$$TARGETPATH
+target.path = $$[QT_INSTALL_QML]/$$TARGETPATH
 INSTALLS += target
 
 # Some final setup
 
-TARGET = $$qt5LibraryTarget($$TARGET)
+TARGET = $$qt5LibraryTarget($$TARGET, "qml/$$TARGETPATH/")
 
 load(qt_targets)
 load(qt_common)
@@ -74,21 +68,15 @@ load(qt_common)
 # To regenerate run 'make qmltypes' which will update the plugins.qmltypes file in the source
 # directory.  Then review and commit the changes made to plugins.qmltypes.
 #
-!cross_compile {
-    qml1_target {
-        qmlplugindump = qml1plugindump
-        importpath.name = QML_IMPORT_PATH
-    } else {
-        qmlplugindump = qmlplugindump
-        importpath.name = QML2_IMPORT_PATH
-    }
+# Due to the above mentioned drawbacks, there is a better mechanism available now: qmltyperegistrar
+# can generate the .qmltypes files at compile time. It will do this when CONFIG += qmltypes is set.
+# Therefore, don't try to generate the qmltypes files via qmlplugindump in that case.
+!cross_compile:!qmltypes {
+    qmlplugindump = qmlplugindump
+    importpath.name = QML2_IMPORT_PATH
     importpath.value =
     for(qmod, QTREPOS) {
-        qml1_target: \
-            qmod = $$qmod/imports
-        else: \
-            qmod = $$qmod/qml
-        exists($$qmod): importpath.value += $$shell_path($$qmod)
+        exists($$qmod/qml): importpath.value += $$shell_path($$qmod/qml)
     }
     importpath.value = $$unique(importpath.value)
     QT_TOOL_ENV = importpath
@@ -99,19 +87,28 @@ load(qt_common)
     # against concurrent wrapper creation by omitting it during build passes.
     # However, creating the actual targets is reserved to the build passes.
     build_pass|!debug_and_release {
-        isEmpty(IMPORT_VERSION) {
+        isEmpty(QML_IMPORT_VERSION):!isEmpty(IMPORT_VERSION): QML_IMPORT_VERSION = $$IMPORT_VERSION
+        isEmpty(QML_IMPORT_VERSION) {
             no_cxx_module {
-                IMPORT_VERSION = $$section(MODULE_VERSION, ., 0, 1)
-                isEmpty(IMPORT_VERSION): error("Must set IMPORT_VERSION")
+                QML_IMPORT_VERSION = $$section(MODULE_VERSION, ., 0, 1)
+                isEmpty(QML_IMPORT_VERSION): error("Must set QML_IMPORT_VERSION")
             } else {
-                IMPORT_VERSION = $$section(QT.$${CXX_MODULE}.VERSION, ., 0, 1)
+                QML_IMPORT_VERSION = $$section(QT.$${CXX_MODULE}.VERSION, ., 0, 1)
             }
         }
 
         load(resolve_target)
-        TARGETPATHBASE = $$replace(TARGETPATH, \\.\\d+\$, )
+        isEmpty(IMPORT_NAME): IMPORT_NAME = $$replace(TARGETPATH, \\.\\d+\$, )
+
+        !qml1_target {
+            isEmpty(QMAKE_PLUGINDUMP_DEPENDENCIES_FILE):exists($$_PRO_FILE_PWD_/dependencies.json): \
+                QMAKE_PLUGINDUMP_DEPENDENCIES_FILE = $$_PRO_FILE_PWD_/dependencies.json
+            !isEmpty(QMAKE_PLUGINDUMP_DEPENDENCIES_FILE): \
+                QMAKE_QMLPLUGINDUMP_FLAGS += -dependencies $$shell_quote($$QMAKE_PLUGINDUMP_DEPENDENCIES_FILE)
+        }
+
         qmltypes.target = qmltypes
-        qmltypes.commands = $$QMLPLUGINDUMP -nonrelocatable $$replace(TARGETPATHBASE, /, .) $$IMPORT_VERSION > $$QMLTYPEFILE
+        qmltypes.commands = $$QMLPLUGINDUMP -nonrelocatable $$QMAKE_QMLPLUGINDUMP_FLAGS $$replace(IMPORT_NAME, /, .) $$QML_IMPORT_VERSION > $$QMLTYPEFILE
         qmltypes.depends = $$QMAKE_RESOLVED_TARGET
     } else {
         qmltypes.CONFIG += recursive
