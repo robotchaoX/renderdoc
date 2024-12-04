@@ -49,12 +49,17 @@ win32 {
 	QMAKE_CFLAGS_RELEASE += /Zi
 	QMAKE_LFLAGS_RELEASE +=/debug /opt:ref
 
-	!contains(QMAKE_TARGET.arch, x86_64) {
-		Debug:DESTDIR = $$_PRO_FILE_PWD_/../Win32/Development
-		Release:DESTDIR = $$_PRO_FILE_PWD_/../Win32/Release
-	} else {
+	contains(QMAKE_TARGET.arch, x86_64) {
 		Debug:DESTDIR = $$_PRO_FILE_PWD_/../x64/Development
 		Release:DESTDIR = $$_PRO_FILE_PWD_/../x64/Release
+	} else {
+		contains(QMAKE_TARGET.arch, x86) {
+			Debug:DESTDIR = $$_PRO_FILE_PWD_/../Win32/Development
+			Release:DESTDIR = $$_PRO_FILE_PWD_/../Win32/Release
+		} else {
+			Debug:DESTDIR = $$_PRO_FILE_PWD_/../ARM64/Development
+			Release:DESTDIR = $$_PRO_FILE_PWD_/../ARM64/Release
+		}
 	}
 
 	# Run SWIG here, since normally we run it from VS
@@ -75,10 +80,14 @@ win32 {
 
 	# Include and link against python
 	INCLUDEPATH += $$_PRO_FILE_PWD_/3rdparty/python/include
-	!contains(QMAKE_TARGET.arch, x86_64) {
-		LIBS += $$_PRO_FILE_PWD_/3rdparty/python/Win32/python36.lib
+	contains(QMAKE_TARGET.arch, x86_64) {
+		LIBS += $$_PRO_FILE_PWD_/3rdparty/python/x64/python311.lib
 	} else {
-		LIBS += $$_PRO_FILE_PWD_/3rdparty/python/x64/python36.lib
+		contains(QMAKE_TARGET.arch, x86) {
+			LIBS += $$_PRO_FILE_PWD_/3rdparty/python/Win32/python311.lib
+		} else {
+			LIBS += $$_PRO_FILE_PWD_/3rdparty/python/ARM64/python311.lib
+		}
 	}
 
 	# Include and link against PySide2
@@ -89,10 +98,14 @@ win32 {
 		INCLUDEPATH += $$_PRO_FILE_PWD_/3rdparty/pyside/include/PySide2/QtCore
 		INCLUDEPATH += $$_PRO_FILE_PWD_/3rdparty/pyside/include/PySide2/QtGui
 		INCLUDEPATH += $$_PRO_FILE_PWD_/3rdparty/pyside/include/PySide2/QtWidgets
-		!contains(QMAKE_TARGET.arch, x86_64) {
-			LIBS += $$_PRO_FILE_PWD_/3rdparty/pyside/Win32/shiboken2.lib
-		} else {
+		contains(QMAKE_TARGET.arch, x86_64) {
 			LIBS += $$_PRO_FILE_PWD_/3rdparty/pyside/x64/shiboken2.lib
+		} else {
+			contains(QMAKE_TARGET.arch, x86) {
+				LIBS += $$_PRO_FILE_PWD_/3rdparty/pyside/Win32/shiboken2.lib
+			} else {
+				LIBS += $$_PRO_FILE_PWD_/3rdparty/pyside/ARM64/python311.lib
+			}
 		}
 	}
 
