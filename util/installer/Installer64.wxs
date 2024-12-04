@@ -118,8 +118,8 @@
           </Component>
 
           <Component Id='Python' Win64="yes" Guid='CE2C9D5B-9040-47C7-8E42-B79B52AE93EB'>
-            <File Id='Python36' Name='python36.dll' DiskId='1' Source='dist/Release64/python36.dll' KeyPath='yes' />
-            <File Id='PythonLibsZIP' Name='python36.zip' DiskId='1' Source='dist/Release64/python36.zip' />
+            <File Id='Python311' Name='python311.dll' DiskId='1' Source='dist/Release64/python311.dll' KeyPath='yes' />
+            <File Id='PythonLibsZIP' Name='python311.zip' DiskId='1' Source='dist/Release64/python311.zip' />
             <File Id='CTypes' Name='_ctypes.pyd' DiskId='1' Source='dist/Release64/_ctypes.pyd' />
             <File Id='Shiboken2' Name='shiboken2.dll' DiskId='1' Source='dist/Release64/shiboken2.dll' />
           </Component>
