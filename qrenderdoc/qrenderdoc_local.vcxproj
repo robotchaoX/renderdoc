@@ -1920,6 +1920,56 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Visible>false</Visible>
     </Content>
+    <Content Include="$(QtBinDir)\double-conversion.dll" Condition="Exists('$(QtBinDir)\double-conversion.dll')">
+      <Link>double-conversion.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="$(QtBinDir)\pcre2-16.dll" Condition="Exists('$(QtBinDir)\pcre2-16.dll')">
+      <Link>pcre2-16.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="$(QtBinDir)\libpng16.dll" Condition="Exists('$(QtBinDir)\libpng16.dll')">
+      <Link>libpng16.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="$(QtBinDir)\harfbuzz.dll" Condition="Exists('$(QtBinDir)\harfbuzz.dll')">
+      <Link>harfbuzz.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="$(QtBinDir)\zlib1.dll" Condition="Exists('$(QtBinDir)\zlib1.dll')">
+      <Link>zlib1.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="$(QtBinDir)\zstd.dll" Condition="Exists('$(QtBinDir)\zstd.dll')">
+      <Link>zstd.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="$(QtBinDir)\brotlicommon.dll" Condition="Exists('$(QtBinDir)\brotlicommon.dll')">
+      <Link>brotlicommon.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="$(QtBinDir)\brotlidec.dll" Condition="Exists('$(QtBinDir)\brotlidec.dll')">
+      <Link>brotlidec.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="$(QtBinDir)\bz2.dll" Condition="Exists('$(QtBinDir)\bz2.dll')">
+      <Link>bz2.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="$(QtBinDir)\freetype.dll" Condition="Exists('$(QtBinDir)\freetype.dll')">
+      <Link>freetype.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
     <Content Include="$(QtBinDir)\libeay32.dll" Condition="Exists('$(QtBinDir)\libeay32.dll')">
       <Link>libeay32.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
