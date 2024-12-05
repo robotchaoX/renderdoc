@@ -200,9 +200,9 @@ CrashDialog::CrashDialog(PersistantConfig &cfg, QVariantMap crashReportJSON, QWi
 #if defined(Q_OS_WIN32)
 #if QT_POINTER_SIZE == 8
     text +=
-        tr("you have libcrypto-1_1-64.dll and libssl-1_1-64.dll available next to qrenderdoc.exe.");
+        tr("you have libcrypto-3-64.dll and libssl-3-64.dll available next to qrenderdoc.exe.");
 #else
-    text += tr("you have libcrypto-1_1.dll and libssl-1_1.dll available next to qrenderdoc.exe.");
+    text += tr("you have libcrypto-3.dll and libssl-3.dll available next to qrenderdoc.exe.");
 #endif
 #else
     text += tr("you have the runtime libopenssl library >= 1.1.1 available in your system.");
