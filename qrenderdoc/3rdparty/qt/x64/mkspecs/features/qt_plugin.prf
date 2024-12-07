@@ -35,9 +35,9 @@ CONFIG += relative_qt_rpath  # Qt's plugins should be relocatable
 # Qt libraries should only use Application Extension safe APIs
 darwin:!no_app_extension_api_only: CONFIG += app_extension_api_only
 
-CONFIG(static, static|shared)|prefix_build {
-    isEmpty(MODULE): MODULE = $$basename(TARGET)
+isEmpty(MODULE): MODULE = $$basename(TARGET)
 
+CONFIG(static, static|shared)|prefix_build {
     mod_work_pfx = $$MODULE_QMAKE_OUTDIR/mkspecs/modules
     force_independent: \
         mod_inst_pfx = $$MODULE_QMAKE_OUTDIR/mkspecs/modules-inst
@@ -91,9 +91,12 @@ CONFIG(static, static|shared)|prefix_build {
 target.path = $$[QT_INSTALL_PLUGINS]/$$PLUGIN_TYPE
 INSTALLS += target
 
-TARGET = $$qt5LibraryTarget($$TARGET)
+qt_libinfix_plugins: TARGET = $$TARGET$$QT_LIBINFIX
+TARGET = $$qt5LibraryTarget($$TARGET, "plugins/$$PLUGIN_TYPE/")
 
 CONFIG += create_cmake
+
+DEFINES *= QT_DEPRECATED_WARNINGS
 
 load(qt_targets)
 load(qt_common)

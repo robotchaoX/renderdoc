@@ -1,9 +1,21 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Development|ARM64">
+      <Configuration>Development</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Development|Win32">
       <Configuration>Development</Configuration>
       <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="QTDebug|ARM64">
+      <Configuration>QTDebug</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM64">
+      <Configuration>Release</Configuration>
+      <Platform>ARM64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
@@ -66,6 +78,14 @@
     <LocalDebuggerWorkingDirectory>$(OutputDirectory)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Platform)'=='x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Platform)'=='ARM64'">
     <ClCompile>
       <PreprocessorDefinitions>WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -1790,13 +1810,23 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Visible>false</Visible>
     </Content>
-    <Content Include="$(PythonDLLsDir)\libcrypto-3.dll" Condition="Exists('$(PythonDLLsDir)\libcrypto-3.dll')">
+    <Content Include="$(PythonDLLsDir)\libcrypto-3.dll" Condition="Exists('$(PythonDLLsDir)\libcrypto-3.dll') AND ('$(Platform)'=='Win32' OR '$(Platform)'=='x64')">
       <Link>libcrypto-3.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Visible>false</Visible>
     </Content>
-    <Content Include="$(PythonDLLsDir)\libssl-3.dll" Condition="Exists('$(PythonDLLsDir)\libssl-3.dll')">
+    <Content Include="$(PythonDLLsDir)\libcrypto-3-arm64.dll" Condition="Exists('$(PythonDLLsDir)\libcrypto-3-arm64.dll') AND '$(Platform)'=='ARM64'">
+      <Link>libcrypto-3-arm64.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="$(PythonDLLsDir)\libssl-3.dll" Condition="Exists('$(PythonDLLsDir)\libssl-3.dll') AND ('$(Platform)'=='Win32' OR '$(Platform)'=='x64')">
       <Link>libssl-3.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="$(PythonDLLsDir)\libssl-3-arm64.dll" Condition="Exists('$(PythonDLLsDir)\libssl-3-arm64.dll') AND '$(Platform)'=='ARM64'">
+      <Link>libssl-3-arm64.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Visible>false</Visible>
     </Content>
@@ -1880,23 +1910,83 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Visible>false</Visible>
     </Content>
-    <Content Include="$(QtBinDir)\libcrypto-1_1.dll" Condition="Exists('$(QtBinDir)\libcrypto-1_1.dll') AND '$(Platform)'=='Win32'">
-      <Link>libcrypto-1_1.dll</Link>
+    <Content Include="$(QtBinDir)\libcrypto-3.dll" Condition="Exists('$(QtBinDir)\libcrypto-3.dll') AND '$(Platform)'=='Win32'">
+      <Link>libcrypto-3.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Visible>false</Visible>
     </Content>
-    <Content Include="$(QtBinDir)\libssl-1_1.dll" Condition="Exists('$(QtBinDir)\libssl-1_1.dll') AND '$(Platform)'=='Win32'">
-      <Link>libssl-1_1.dll</Link>
+    <Content Include="$(QtBinDir)\libssl-3.dll" Condition="Exists('$(QtBinDir)\libssl-3.dll') AND '$(Platform)'=='Win32'">
+      <Link>libssl-3.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Visible>false</Visible>
     </Content>
-    <Content Include="$(QtBinDir)\libcrypto-1_1-x64.dll" Condition="Exists('$(QtBinDir)\libcrypto-1_1-x64.dll') AND '$(Platform)'=='x64'">
-      <Link>libcrypto-1_1-x64.dll</Link>
+    <Content Include="$(QtBinDir)\libcrypto-3-x64.dll" Condition="Exists('$(QtBinDir)\libcrypto-3-x64.dll') AND '$(Platform)'=='x64'">
+      <Link>libcrypto-3-x64.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Visible>false</Visible>
     </Content>
-    <Content Include="$(QtBinDir)\libssl-1_1-x64.dll" Condition="Exists('$(QtBinDir)\libssl-1_1-x64.dll') AND '$(Platform)'=='x64'">
-      <Link>libssl-1_1-x64.dll</Link>
+    <Content Include="$(QtBinDir)\libssl-3-x64.dll" Condition="Exists('$(QtBinDir)\libssl-3-x64.dll') AND '$(Platform)'=='x64'">
+      <Link>libssl-3-x64.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="$(QtBinDir)\libcrypto-3-arm64.dll" Condition="Exists('$(QtBinDir)\libcrypto-3-arm64.dll') AND '$(Platform)'=='ARM64'">
+      <Link>libcrypto-3-arm64.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="$(QtBinDir)\libssl-3-arm64.dll" Condition="Exists('$(QtBinDir)\libssl-3-arm64.dll') AND '$(Platform)'=='ARM64'">
+      <Link>libssl-3-arm64.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="$(QtBinDir)\double-conversion.dll" Condition="Exists('$(QtBinDir)\double-conversion.dll')">
+      <Link>double-conversion.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="$(QtBinDir)\pcre2-16.dll" Condition="Exists('$(QtBinDir)\pcre2-16.dll')">
+      <Link>pcre2-16.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="$(QtBinDir)\libpng16.dll" Condition="Exists('$(QtBinDir)\libpng16.dll')">
+      <Link>libpng16.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="$(QtBinDir)\harfbuzz.dll" Condition="Exists('$(QtBinDir)\harfbuzz.dll')">
+      <Link>harfbuzz.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="$(QtBinDir)\zlib1.dll" Condition="Exists('$(QtBinDir)\zlib1.dll')">
+      <Link>zlib1.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="$(QtBinDir)\zstd.dll" Condition="Exists('$(QtBinDir)\zstd.dll')">
+      <Link>zstd.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="$(QtBinDir)\brotlicommon.dll" Condition="Exists('$(QtBinDir)\brotlicommon.dll')">
+      <Link>brotlicommon.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="$(QtBinDir)\brotlidec.dll" Condition="Exists('$(QtBinDir)\brotlidec.dll')">
+      <Link>brotlidec.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="$(QtBinDir)\bz2.dll" Condition="Exists('$(QtBinDir)\bz2.dll')">
+      <Link>bz2.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="$(QtBinDir)\freetype.dll" Condition="Exists('$(QtBinDir)\freetype.dll')">
+      <Link>freetype.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Visible>false</Visible>
     </Content>
@@ -2107,7 +2197,7 @@
     <Image Include="Resources\zoom.png" />
   </ItemGroup>
   <ItemGroup>
-    <Natvis Include="python36.natvis" />
+    <Natvis Include="python311.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

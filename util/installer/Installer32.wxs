@@ -124,13 +124,13 @@
             <File Id='Qt5Network' Name='Qt5Network.dll' DiskId='1' Source='dist/Release32/Qt5Network.dll' />
             <File Id='Qt5Svg' Name='Qt5Svg.dll' DiskId='1' Source='dist/Release32/Qt5Svg.dll' />
             <File Id='Qt5Widgets' Name='Qt5Widgets.dll' DiskId='1' Source='dist/Release32/Qt5Widgets.dll' />
-            <File Id='libcrypto' Name='libcrypto-1_1.dll' DiskId='1' Source='dist/Release32/libcrypto-1_1.dll' />
-            <File Id='libssl' Name='libssl-1_1.dll' DiskId='1' Source='dist/Release32/libssl-1_1.dll' />
+            <File Id='libcrypto' Name='libcrypto-3.dll' DiskId='1' Source='dist/Release32/libcrypto-3.dll' />
+            <File Id='libssl' Name='libssl-3.dll' DiskId='1' Source='dist/Release32/libssl-3.dll' />
           </Component>
 
           <Component Id='Python' Guid='63C5667D-38DA-464B-8E2F-B2857B8EAEC8'>
-            <File Id='Python36' Name='python36.dll' DiskId='1' Source='dist/Release32/python36.dll' KeyPath='yes' />
-            <File Id='PythonLibsZIP' Name='python36.zip' DiskId='1' Source='dist/Release32/python36.zip' />
+            <File Id='Python311' Name='python311.dll' DiskId='1' Source='dist/Release32/python311.dll' KeyPath='yes' />
+            <File Id='PythonLibsZIP' Name='python311.zip' DiskId='1' Source='dist/Release32/python311.zip' />
             <File Id='CTypes' Name='_ctypes.pyd' DiskId='1' Source='dist/Release32/_ctypes.pyd' />
             <File Id='Shiboken2' Name='shiboken2.dll' DiskId='1' Source='dist/Release32/shiboken2.dll' />
           </Component>

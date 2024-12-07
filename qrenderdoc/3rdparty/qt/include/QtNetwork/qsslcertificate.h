@@ -55,8 +55,6 @@
 #include <QtCore/qmap.h>
 #include <QtNetwork/qssl.h>
 
-#ifndef QT_NO_SSL
-
 QT_BEGIN_NAMESPACE
 
 class QDateTime;
@@ -68,7 +66,7 @@ class QStringList;
 
 class QSslCertificate;
 // qHash is a friend, but we can't use default arguments for friends (§8.3.6.4)
-Q_NETWORK_EXPORT uint qHash(const QSslCertificate &key, uint seed = 0) Q_DECL_NOTHROW;
+Q_NETWORK_EXPORT uint qHash(const QSslCertificate &key, uint seed = 0) noexcept;
 
 class QSslCertificatePrivate;
 class Q_NETWORK_EXPORT QSslCertificate
@@ -86,16 +84,21 @@ public:
         EmailAddress
     };
 
+    enum class PatternSyntax {
+        RegularExpression,
+        Wildcard,
+        FixedString
+    };
+
+
     explicit QSslCertificate(QIODevice *device, QSsl::EncodingFormat format = QSsl::Pem);
     explicit QSslCertificate(const QByteArray &data = QByteArray(), QSsl::EncodingFormat format = QSsl::Pem);
     QSslCertificate(const QSslCertificate &other);
     ~QSslCertificate();
-#ifdef Q_COMPILER_RVALUE_REFS
-    QSslCertificate &operator=(QSslCertificate &&other) Q_DECL_NOTHROW { swap(other); return *this; }
-#endif
+    QSslCertificate &operator=(QSslCertificate &&other) noexcept { swap(other); return *this; }
     QSslCertificate &operator=(const QSslCertificate &other);
 
-    void swap(QSslCertificate &other) Q_DECL_NOTHROW
+    void swap(QSslCertificate &other) noexcept
     { qSwap(d, other.d); }
 
     bool operator==(const QSslCertificate &other) const;
@@ -122,6 +125,9 @@ public:
     QStringList issuerInfo(const QByteArray &attribute) const;
     QStringList subjectInfo(SubjectInfo info) const;
     QStringList subjectInfo(const QByteArray &attribute) const;
+    QString issuerDisplayName() const;
+    QString subjectDisplayName() const;
+
     QList<QByteArray> subjectInfoAttributes() const;
     QList<QByteArray> issuerInfoAttributes() const;
 #if QT_DEPRECATED_SINCE(5,0)
@@ -131,21 +137,30 @@ public:
     QMultiMap<QSsl::AlternativeNameEntryType, QString> subjectAlternativeNames() const;
     QDateTime effectiveDate() const;
     QDateTime expiryDate() const;
+#ifndef QT_NO_SSL
     QSslKey publicKey() const;
+#endif
     QList<QSslCertificateExtension> extensions() const;
 
     QByteArray toPem() const;
     QByteArray toDer() const;
     QString toText() const;
 
-    static QList<QSslCertificate> fromPath(
-        const QString &path, QSsl::EncodingFormat format = QSsl::Pem,
-        QRegExp::PatternSyntax syntax = QRegExp::FixedString);
+#if QT_DEPRECATED_SINCE(5,15)
+    QT_DEPRECATED_X("Use the overload not using QRegExp")
+    static QList<QSslCertificate> fromPath(const QString &path, QSsl::EncodingFormat format,
+                                           QRegExp::PatternSyntax syntax);
+#endif
+    static QList<QSslCertificate> fromPath(const QString &path,
+                                           QSsl::EncodingFormat format = QSsl::Pem,
+                                           PatternSyntax syntax = PatternSyntax::FixedString);
+
     static QList<QSslCertificate> fromDevice(
         QIODevice *device, QSsl::EncodingFormat format = QSsl::Pem);
     static QList<QSslCertificate> fromData(
         const QByteArray &data, QSsl::EncodingFormat format = QSsl::Pem);
 
+#ifndef QT_NO_SSL
 #if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
     static QList<QSslError> verify(const QList<QSslCertificate> &certificateChain, const QString &hostName = QString());
 #else
@@ -154,8 +169,9 @@ public:
 
     static bool importPkcs12(QIODevice *device,
                              QSslKey *key, QSslCertificate *cert,
-                             QList<QSslCertificate> *caCertificates = Q_NULLPTR,
+                             QList<QSslCertificate> *caCertificates = nullptr,
                              const QByteArray &passPhrase=QByteArray());
+#endif
 
     Qt::HANDLE handle() const;
 
@@ -164,7 +180,7 @@ private:
     friend class QSslCertificatePrivate;
     friend class QSslSocketBackendPrivate;
 
-    friend Q_NETWORK_EXPORT uint qHash(const QSslCertificate &key, uint seed) Q_DECL_NOTHROW;
+    friend Q_NETWORK_EXPORT uint qHash(const QSslCertificate &key, uint seed) noexcept;
 };
 Q_DECLARE_SHARED(QSslCertificate)
 
@@ -177,7 +193,5 @@ Q_NETWORK_EXPORT QDebug operator<<(QDebug debug, QSslCertificate::SubjectInfo in
 QT_END_NAMESPACE
 
 Q_DECLARE_METATYPE(QSslCertificate)
-
-#endif // QT_NO_SSL
 
 #endif
